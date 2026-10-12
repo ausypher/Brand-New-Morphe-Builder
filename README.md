@@ -4,207 +4,109 @@
 
 <p align="center">
   <b>Automated, high-performance CI/CD pipeline for building root Magisk/KernelSU modules and non-root APKs.</b><br>
-  Powered by <a href="https://github.com/MorpheApp">Morphe</a>, <a href="https://github.com/RookieEnough/De-Vanced">De-Vanced</a>, <a href="https://github.com/crimera/piko">Piko</a>, and many more.
+  Powered by <a href="https://github.com/MorpheApp">Morphe</a>, <a href="https://github.com/crimera/piko">Piko</a>, <a href="https://github.com/SysAdminDoc">SysAdminDoc</a>, <a href="https://github.com/RookieEnough/De-Vanced">De-Vanced</a>, and many more.
 </p>
 
-[![Build Workflow](https://img.shields.io/github/actions/workflow/status/dj-tanjid/Morphe-DeVanced-Builder/build.yml?label=Build%20Status&logo=githubactions&logoColor=white)](../../actions/workflows/build.yml)
-[![GitHub License](https://img.shields.io/github/license/dj-tanjid/Morphe-DeVanced-Builder?logo=github&label=License&color=blue)](https://github.com/dj-tanjid/Morphe-DeVanced-Builder/blob/main/LICENSE)
-[![Latest Release](https://img.shields.io/github/v/release/dj-tanjid/Morphe-DeVanced-Builder?label=Latest%20Release&logo=android&color=success)](../../releases/latest)
-[![GitHub Downloads](https://img.shields.io/github/downloads/dj-tanjid/Morphe-DeVanced-Builder/total?logo=github&label=Downloads&color=orange)](https://github.com/dj-tanjid/Morphe-DeVanced-Builder/releases)
+[![Build Workflow](https://img.shields.io/github/actions/workflow/status/dj-tanjid/Brand-New-Morphe-Builder/build.yml?label=Build%20Status&logo=githubactions&logoColor=white)](../../actions/workflows/build.yml)
+[![GitHub License](https://img.shields.io/github/license/dj-tanjid/Brand-New-Morphe-Builder?logo=github&label=License&color=blue)](https://github.com/dj-tanjid/Brand-New-Morphe-Builder/blob/main/LICENSE)
+[![Latest Release](https://img.shields.io/github/v/release/dj-tanjid/Brand-New-Morphe-Builder?label=Latest%20Release&logo=android&color=success)](../../releases/latest)
+[![GitHub Downloads](https://img.shields.io/github/downloads/dj-tanjid/Brand-New-Morphe-Builder/total?logo=github&label=Downloads&color=orange)](https://github.com/dj-tanjid/Brand-New-Morphe-Builder/releases)
 
 </div>
 
 > [!CAUTION]
-> **Security Notice:** Avoid downloading modified APKs or Magisk modules from untrusted third-party websites or Telegram channels. They may contain malicious code and impersonate official projects. Always build your own or download directly from trusted open-source repositories like this one.
+> **Security Notice:** Avoid downloading modified APKs or Magisk modules from untrusted third-party websites or Telegram channels. Always build your own or download directly from trusted open-source repositories.
 
 ---
 
-## 🌟 Unique Features of this Fork
+## 🌟 Features & Improvements
 
-This builder is an advanced, hardened fork of [j-hc's revanced-magisk-module](https://github.com/j-hc/revanced-magisk-module) engineered by **TanJid Creations**, featuring extended scraping engines and multi-source patch support:
-
-* **Custom Root Module Banners**: Includes exclusive, custom-designed banners created by me for Magisk, KernelSU, and APatch root managers. Currently available for **YouTube**, **YouTube Music**, **Reddit**, and **Google Photos** modules.
-* **Dual-Host Toolchain Fetching (`github:` & `gitlab:`)**: Fetch patch bundles and CLI binaries across both **GitHub Releases** and **GitLab API** endpoints with unified prefix formatting.
-* **Multi-Bundle Patch Support**: Combine multiple independent patch repositories (e.g., `crimera/piko` + `inotia00/x-shim`) in a single compilation run for an app target.
-* **5-Tier Resilient Download Engine**: Automatically resolves APKs using an intelligent fallback pipeline:
+* **Custom Root Module Banners**: Built-in visual branding for Magisk, KernelSU, and APatch root managers across supported targets.
+* **Dual-Host Toolchain Fetching (`github:` & `gitlab:`)**: Dynamically pulls patch bundles and CLI binaries across GitHub Releases and GitLab APIs using uniform URI prefixes.
+* **Multi-Bundle Compilation**: Merges multiple independent patch sets (e.g. `crimera/piko` + secondary shims) into a single patching run.
+* **5-Tier Fallback Download Engine**: Automatically resolves APK assets via an intelligent cascading pipeline:
   $$\text{APKMirror} \longrightarrow \text{Uptodown} \longrightarrow \text{GitHub Releases} \longrightarrow \text{Direct DL} \longrightarrow \text{Archive.org}$$
-* **Advanced Python Scraping Engine**: Features reliable APK retrieval without workflow interruptions.
-* **Automated Split-APK Merging**: Natively downloads and extracts `.apkm`, `.xapk`, and `.zip` bundles, merging them dynamically before patching.
-* **Explicit Package ID Overrides (`pkg-name`)**: Eliminates scraping dependencies and guarantees continuous builds even during anti-bot protection updates.
-* **Smart Versioning & AAPT2 Badging**: Autonomously bypasses strict version mismatches (e.g., `-SECONDARY` suffixes) via automated `--force` flags and extracts exact `versionName` strings via `aapt2` to ensure perfect Magisk/KernelSU module mounting.
-* **In-App Update Checks**: Natively inject custom or privately-hosted OTA update checkers (e.g., `TanJid Update Check`) directly using multi-source configuration arrays and GitHub PATs.
-* **Multi-Architecture Matrix Compilation (`arch = "both"`)**: Concurrently packages architecture-tailored APKs and universal root modules (`arm64-v8a`, `armeabi-v7a`, `x86_64`) with automated odex optimization.
+* **Version Code & Suffix Targeting**: Allows specifying an exact `version-code` or target release suffix in `config.toml`, falling back to patch-recommended versions when omitted.
+* **Untampered Stock Signatures (`include-stock = "split"`)**: Preserves original developer signatures (Google, Meta) inside root modules to prevent Google Play Services verification crashes and `INSTALL_FAILED_DUPLICATE_PERMISSION` errors.
+* **Autonomous Python Scraping Backend**: Cloudflare-resilient downloading engine powered by `curl_cffi` and local solver integration.
+* **AAPT2 Badging & Auto-Force**: Extracts true `versionName` attributes directly from downloaded binaries and automatically forces compilation through version-mismatch checks.
+* **Multi-Architecture Matrix Compilation (`arch = "both"`)**: Concurrently packages architecture-tailored APKs and universal root modules (`arm64-v8a`, `armeabi-v7a`, `x86_64`).
 
 ---
 
 ## 📱 Supported Applications
 
-<table>
-  <tr>
-    <th>Application</th>
-    <th>Patches Source</th>
-    <th>Variants Built</th>
-  </tr>
-  <tr>
-    <td><b>YouTube</b></td>
-    <td>Morphe / Anddea</td>
-    <td>Non-Root APK + Magisk/KSU Module</td>
-  </tr>
-  <tr>
-    <td><b>YouTube Music</b></td>
-    <td>Morphe / Anddea</td>
-    <td>Non-Root APK + Magisk/KSU Module</td>
-  </tr>
-  <tr>
-    <td><b>Google Photos</b></td>
-    <td>De-Vanced / Rushi / Akash</td>
-    <td>Non-Root APK + Magisk/KSU Module</td>
-  </tr>
-  <tr>
-    <td><b>Reddit</b></td>
-    <td>Morphe</td>
-    <td>Non-Root APK + Magisk/KSU Module</td>
-  </tr>
-  <tr>
-    <td><b>Twitter / X</b></td>
-    <td>Piko / Morphe</td>
-    <td>Non-Root APK</td>
-  </tr>
-  <tr>
-    <td><b>Instagram</b></td>
-    <td>Piko</td>
-    <td>Non-Root APK</td>
-  </tr>
-  <tr>
-    <td><b>Facebook & Messenger</b></td>
-    <td>De-Vanced / Rushi / Froggo / Andrew</td>
-    <td>Non-Root APK</td>
-  </tr>
-  <tr>
-    <td><b>Threads</b></td>
-    <td>De-Vanced / Chiggi</td>
-    <td>Non-Root APK</td>
-  </tr>
-  <tr>
-    <td><b>Google Camera</b></td>
-    <td>Akshayykadam</td>
-    <td>Non-Root APK + Magisk/KSU Module</td>
-  </tr>
-  <tr>
-    <td><b>Gboard</b></td>
-    <td>Jason</td>
-    <td>Non-Root APK + Magisk/KSU Module</td>
-  </tr>
-  <tr>
-    <td><b>VPNs (1.1.1.1, Proton, Windscribe)</b></td>
-    <td>Rushi</td>
-    <td>Non-Root APK</td>
-  </tr>
-  <tr>
-    <td><b>Utilities (Speedtest, Send Files To TV, TeraBox, APKMirror Installer, Bluetooth Keyboard & Mouse)</b></td>
-    <td>Rushi</td>
-    <td>Non-Root APK</td>
-  </tr>
-  <tr>
-    <td><b>PokeRaid</b></td>
-    <td>DanielTheManiel / Nai64</td>
-    <td>Non-Root APK</td>
-  </tr>
-</table>
+| Application | Patch Provider | Variants Built |
+| :--- | :--- | :--- |
+| **YouTube** | Morphe / Anddea | Non-Root APK + Root Module |
+| **YouTube Music** | Morphe / Anddea | Non-Root APK + Root Module |
+| **Google Photos** | De-Vanced / Rushi / Akash | Non-Root APK + Root Module |
+| **Reddit** | Morphe | Non-Root APK + Root Module |
+| **Twitter / X** | Piko / Piko-NewX | Non-Root APK |
+| **Instagram** | SysAdminDoc / Piko | Non-Root APK + Root Module |
+| **Facebook & Messenger** | SysAdminDoc / De-Vanced / Froggo / Andrew | Non-Root APK + Root Module |
+| **Threads** | SysAdminDoc / Chiggi / De-Vanced | Non-Root APK + Root Module |
+| **Pixel Camera** | Akshayykadam | Non-Root APK |
+| **Gboard** | Jason | Non-Root APK + Root Module |
+| **Claude by Anthropic** | SatanMerde | Non-Root APK |
+| **DeepL** | SatanMerde | Non-Root APK |
+| **Google Maps** | BearInMindCat | Non-Root APK + Root Module |
+| **VPNs (1.1.1.1, Proton, Windscribe)** | Rushi / HXReborn | Non-Root APK |
+| **Utilities (Speedtest, Send Files To TV, TeraBox)** | SatanMerde / Rushi / HXReborn | Non-Root APK |
+| **PokeRaid** | Dan1elTheMan1el / Nai64 | Non-Root APK |
 
 ---
 
 ## 🚀 Installation Guide
 
-### 🔹 Non-Root Users
+### Non-Root Users
 1. Download and install [ReVanced GmsCore](https://github.com/ReVanced/GmsCore/releases/latest) or [Morphe MicroG-RE](https://github.com/MorpheApp/MicroG-RE/releases/latest).
 2. Download your preferred patched APK from the [Releases Page](../../releases/latest).
-3. *(Optional)* Import custom clean settings via the in-app settings menu.
+3. *(Optional)* Import custom presets via in-app settings.
 
-### 🔹 Root Users (Magisk / KernelSU / APatch)
-1. Flash the generated `.zip` module from the [Releases Page](../../releases/latest) in Magisk, KernelSU, or APatch.
-2. Reboot your device.
+### Root Users (Magisk / KernelSU / APatch)
+1. Flash the generated `.zip` module from the [Releases Page](../../releases/latest) in your root manager.
+2. The module automatically handles base installation, library extraction, and mounting without requiring a reboot.
 3. *(Optional)* Use [zygisk-detach](https://github.com/j-hc/zygisk-detach) to detach YouTube and YT Music from Google Play Store auto-updates.
-
----
-
-## ⚙️ Custom Settings Import
-
-If you prefer clean, uncluttered interfaces with optimal playback and layout defaults, you can import custom preset settings:
-
-1. Open the application (**YouTube** or **YouTube Music**).
-2. Navigate to: **Settings** &rarr; **Morphe / ReVanced Extended** &rarr; **Miscellaneous** &rarr; **Import/Export Settings**.
-3. Import the preset from [custom_settings-by_tanjid](../teejay/custom_settings-by_tanjid).
 
 ---
 
 ## 🛠️ Build Your Own
 
-1. Fork this repository or click **Use this template**.
-2. Go to **Settings** &rarr; **Secrets and variables** &rarr; **Actions** and add a Personal Access Token (PAT) with `repo` scopes as **`UPDATE_REPO_PAT`** if you are compiling patches from private repositories.
-3. Customize your build matrix in [`config.toml`](./config.toml).
-   *(For a detailed breakdown of all configuration options, please refer to the [**Configuration Guide (`CONFIG.md`)**](./CONFIG.md)).*
+1. Fork this repository.
+2. If accessing private patch repositories, add a Personal Access Token as **`UPDATE_REPO_PAT`** in **Settings** &rarr; **Secrets and variables** &rarr; **Actions**.
+3. Adjust build selections in [`config.toml`](./config.toml). See [`CONFIG.md`](./CONFIG.md) for full syntax details.
 4. Go to **Actions** &rarr; **Build Modules** &rarr; **Run workflow**.
-5. Download your custom binaries directly from your GitHub Releases tab!
-
----
-
-## 🔧 Troubleshooting & Magisk Mount Issues
-
-If you are experiencing issues with the classic Magisk/KernelSU mount method for your modules, such as:
-
-* ❌ **"Reflash needed"** errors appearing after device reboots.
-* ⚠️ **"Suspicious mount detected"** warnings triggered by root-detector or banking apps.
-
-**💡 Solution:** You can consider using the [**rvmm-zygisk-mount**](https://github.com/j-hc/rvmm-zygisk-mount) module alongside your installations to bypass these classic mounting issues.
+5. Download your compiled binaries directly from your GitHub Releases page.
 
 ---
 
 ## 🤝 Credits
 
-Special thanks to the open-source developers who make this ecosystem possible:
-
-* [j-hc](https://github.com/j-hc) : Original creator of the ReVanced Magisk Module builder.
-* [Peter Noël Muller](https://github.com/peternmuller) & [Nguyễn Văn Bằng](https://github.com/nvbangg) : For foundational scripts and inspirations.
-* [Morphe Team](https://github.com/MorpheApp) : Next-generation patcher and desktop CLI.
-* [crimera](https://github.com/crimera) : Developer of the Piko patches for Twitter/X and Instagram.
-* [Aaron Veil (anddea)](https://github.com/anddea) : ReVanced Extended ecosystem patches.
-* [Sarthak Sinha (RookieEnough)](https://github.com/RookieEnough/) : De-Vanced patches.
-* [Rushi Ranpise](https://github.com/rushiranpise) : Morphe patches for utility applications and VPNs.
+* [j-hc](https://github.com/j-hc) : Original creator of the ReVanced Magisk module builder.
+* [Morphe Team](https://github.com/MorpheApp) : Morphe patcher framework, CLI, and base integrations.
+* [ReVanced Team](https://github.com/ReVanced) : Original bytecode manipulation engine and patch foundations.
+* [SysAdminDoc](https://github.com/SysAdminDoc) : Hushfacebook, HushMessenger, HushThreads, and HushGram patches.
+* [crimera](https://github.com/crimera) : Piko and Piko-NewX patches for Twitter/X and Instagram.
+* [Sarthak Sinha (RookieEnough)](https://github.com/RookieEnough) : De-Vanced patches.
+* [SatanMerde](https://github.com/SatanMerde) : D-moniakPatches for Claude, DeepL, and Speedtest.
+* [HXReborn](https://github.com/hxreborn) : Morphe patches for Proton VPN and TeraBox.
+* [Rushi Ranpise](https://github.com/rushiranpise) : Morphe patches for utility tools and VPNs.
+* [Aaron Veil (anddea)](https://github.com/anddea) : ReVanced Extended patches.
+* [Akshay Kadam (Akshayykadam)](https://github.com/Akshayykadam) : Pixel Camera optimization patches.
 * [Jason Wu](https://github.com/jasonwu1994) : Gboard optimization patches.
-* [Akshay Kadam (Akshayykadam)](https://github.com/Akshayykadam) : Pixel Camera (Google Camera) optimization patches.
-* [Sapito Sucio](https://github.com/SapitoSucio) : Froggo Morphe patches for Facebook.
-* [Andrew Liang (andrewliang25)](https://github.com/andrewliang25) : Morphe patches for Facebook.
-* [durgesh0505](https://github.com/durgesh0505) : Chiggi Morphe patches for Threads.
-* [Daniel Friedman](https://github.com/Dan1elTheMan1el) & [Nai64](https://github.com/Nai64) : PokeRaid module patches.
-* [Akash Sriram](https://github.com/Akash-Sriram) : Google Photos ecosystem patches.
-* [ReVanced Team](https://github.com/ReVanced) : Original patcher framework and bytecode tooling.
+* [Akash Sriram](https://github.com/Akash-Sriram) : Google Photos spoofing patches.
+* [bearinmindcat](https://github.com/bearinmindcat) : Google Maps patches.
+* [Sapito Sucio](https://github.com/SapitoSucio) : Froggo patches for Facebook.
+* [Andrew Liang](https://github.com/andrewliang25) : Facebook layout patches.
+* [durgesh0505](https://github.com/durgesh0505) : Chiggi patches for Threads.
+* [Daniel Friedman](https://github.com/Dan1elTheMan1el) & [Nai64](https://github.com/Nai64) : PokeRaid patch bundles.
+* [Peter Noël Muller](https://github.com/peternmuller) & [Nguyễn Văn Bằng](https://github.com/nvbangg) : Foundational module scripting and inspiration.
 
 ---
 
 <div align="center">
 
-⭐ **Star this repository if you find it helpful!**  
-Maintained with ❤️ by [TanJid Creations](https://github.com/dj-tanjid)
+Maintained by [TanJid Creations](https://github.com/dj-tanjid)
 
 </div>
-
----
-
-## 📄 License
-
-```text
-Copyright (C) 2024-2026 Tanjidul Hossain (TanJid Creations)
-
-This program is free software: you can redistribute it and/or modify
-it under the terms of the GNU General Public License as published by
-the Free Software Foundation, either version 3 of the License, or
-(at your option) any later version.
-
-This program is distributed in the hope that it will be useful,
-but WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
-GNU General Public License for more details.
-
-You should have received a copy of the GNU General Public License
-along with this program. If not, see [https://www.gnu.org/licenses/](https://www.gnu.org/licenses/)
