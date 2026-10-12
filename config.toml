@@ -235,6 +235,7 @@ patches-source = "github:SysAdminDoc/Hushfacebook"
 cli-source = "github:MorpheApp/morphe-desktop"
 rv-brand = "SysAdminDoc"
 arch = "arm64-v8a"
+include-stock = "split" # Options 'split', 'merged', or 'disable'
 # version = "latest"
 version = "auto" # 'auto', 'experimental', 'latest' or a version number
 # version = "573.0.0.37.74"
