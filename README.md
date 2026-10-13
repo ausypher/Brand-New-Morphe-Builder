@@ -86,7 +86,7 @@
 * [j-hc](https://github.com/j-hc) : Original creator of the ReVanced Magisk module builder.
 * [Morphe Team](https://github.com/MorpheApp) : Morphe patcher framework, CLI, and base integrations.
 * [ReVanced Team](https://github.com/ReVanced) : Original bytecode manipulation engine and patch foundations.
-* [SysAdminDoc](https://github.com/SysAdminDoc) : Hushfacebook, HushMessenger, HushThreads, and HushGram patches.
+* [Matthew Parker](https://github.com/SysAdminDoc) : Hushfacebook, HushMessenger, HushThreads, and HushGram patches.
 * [crimera](https://github.com/crimera) : Piko and Piko-NewX patches for Twitter/X and Instagram.
 * [Sarthak Sinha (RookieEnough)](https://github.com/RookieEnough) : De-Vanced patches.
 * [SatanMerde](https://github.com/SatanMerde) : D-moniakPatches for Claude, DeepL, and Speedtest.
