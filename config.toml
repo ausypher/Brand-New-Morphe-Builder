@@ -135,6 +135,7 @@ version = "latest"
 build-mode = "both" # Options 'apk', 'module', or 'both'
 included-patches = """\
     'Spoof features' \
+    'Official package name' \
     """
 # patches-version = "dev" # Options 'latest', 'dev', or A specific version tag
 apkmirror-dlurl = "https://www.apkmirror.com/apk/google-inc/photos"
@@ -519,6 +520,7 @@ included-patches = """\
     'Hide that you're typing' \
     'Show a post's exact time' \
     'See who a story mentions' \
+    'View DM photos and videos anonymously' \
     """
 apkmirror-dlurl = "https://www.apkmirror.com/apk/instagram/instagram-instagram"
 uptodown-dlurl = "https://instagram.en.uptodown.com/android"
