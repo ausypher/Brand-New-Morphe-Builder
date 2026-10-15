@@ -556,6 +556,7 @@ included-patches = """\
     'Hide that you're typing' \
     'Show a post's exact time' \
     'See who a story mentions' \
+    'View DM photos and videos anonymously' \
     """
 excluded-patches = """\
     'Restore trust on re-signed builds' \
