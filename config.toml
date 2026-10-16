@@ -607,7 +607,7 @@ apkmirror-dlurl = "https://www.apkmirror.com/apk/windscribe/windscribe-vpn"
 uptodown-dlurl = "https://windscribe.en.uptodown.com/android"
 
 [TeraBox-HXReborn]
-enabled = false
+enabled = true
 app-name = "TeraBox"
 patches-source = "github:hxreborn/morphe-patches"
 cli-source = "github:MorpheApp/morphe-desktop"
