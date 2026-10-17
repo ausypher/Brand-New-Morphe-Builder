@@ -1665,7 +1665,7 @@ build_rv() {
 
 	local stock_apk="${TEMP_DIR}/${pkg_name}-${version_f}-${arch_f}.apk"
 	local stock_file=""
-	
+
 	if [[ -f "${stock_apk}.apkm" ]]; then
 		stock_file="${stock_apk}.apkm"
 	elif [[ -f "${stock_apk}" ]]; then
@@ -1676,7 +1676,7 @@ build_rv() {
 		for dl_p in "${DL_SRCS[@]}"; do
 			if [[ -z "${args[${dl_p}_dlurl]:-}" ]]; then continue; fi
 			pr "Downloading '${table}' from '${dl_p}'"
-			if ! isoneof $dl_p "${tried_dl[@]}"; then
+			if ! isoneof "$dl_p" "${tried_dl[@]}"; then
 				if ! get_${dl_p}_resp "${args[${dl_p}_dlurl]}"; then
 					epr "ERROR: Could not get '${table}' from '${dl_p}'"
 					continue
@@ -1686,8 +1686,13 @@ build_rv() {
 				epr "ERROR: Could not download '${table}' from '${dl_p}' with version '${version_f}', arch '${arch}', dpi '${args[dpi]:-}'"
 				continue
 			fi
-			if [[ -f "${stock_apk}.apkm" ]]; then stock_file="${stock_apk}.apkm"; break; fi
-			if [[ -f "${stock_apk}" ]]; then stock_file="${stock_apk}"; break; fi
+			if [[ -f "${stock_apk}.apkm" ]]; then
+				stock_file="${stock_apk}.apkm"
+				break
+			elif [[ -f "${stock_apk}" ]]; then
+				stock_file="${stock_apk}"
+				break
+			fi
 		done
 		if [[ -z "$stock_file" ]]; then
 			epr "Stock apk not found ($stock_apk)"
@@ -1712,27 +1717,31 @@ build_rv() {
 			return 0
 		fi
 	fi
-	
+
 	# === Extract actual versionName from the fresh stock APK via AAPT2 ===
 	local aapt_bin=""
 	if command -v aapt >/dev/null 2>&1; then aapt_bin="aapt"
 	elif command -v aapt2 >/dev/null 2>&1; then aapt_bin="aapt2"
-	elif [[ -n "${ANDROID_HOME:-}" ]]; then aapt_bin=$(find "$ANDROID_HOME/build-tools" -name "aapt" 2>/dev/null | sort -r | head -1);
+	elif [[ -n "${ANDROID_HOME:-}" ]]; then aapt_bin=$(find "$ANDROID_HOME/build-tools" -name "aapt" 2>/dev/null | sort -r | head -1)
 	elif [[ -f "${AAPT2:-}" ]]; then aapt_bin="$AAPT2"; fi
-	
+
 	if [[ -n "$aapt_bin" && -x "$aapt_bin" ]]; then
-		local real_ver
+		local real_ver=""
 		local check_apk="$stock_file"
 		if [[ "${stock_file##*.}" == "apkm" ]]; then
-			unzip -o -q -j "${stock_file}" "base.apk" -d "$TEMP_DIR" >/dev/null 2>&1 || unzip -o -q -j "${stock_file}" "*.apk" -d "$TEMP_DIR" >/dev/null 2>&1
-			check_apk=$(ls "$TEMP_DIR"/base.apk 2>/dev/null || ls "$TEMP_DIR"/*.apk 2>/dev/null | head -1)
+			rm -rf "${stock_apk}-aapt" || :
+			mkdir -p "${stock_apk}-aapt"
+			unzip -o -q -j "${stock_file}" "base.apk" -d "${stock_apk}-aapt" >/dev/null 2>&1 || unzip -o -q -j "${stock_file}" "*.apk" -d "${stock_apk}-aapt" >/dev/null 2>&1
+			check_apk=$(find "${stock_apk}-aapt" -name "*.apk" | head -1)
 		fi
-		real_ver=$("$aapt_bin" dump badging "$check_apk" 2>/dev/null | grep -m1 "versionName=" | sed -E "s/.*versionName='([^']+)'.*/\1/")
-		if [[ -n "$real_ver" ]]; then 
-			version_f="$real_ver"
-			version="$real_ver"
+		if [[ -n "$check_apk" && -f "$check_apk" ]]; then
+			real_ver=$("$aapt_bin" dump badging "$check_apk" 2>/dev/null | grep -m1 "versionName=" | sed -E "s/.*versionName='([^']+)'.*/\1/")
+			if [[ -n "$real_ver" ]]; then
+				version_f="$real_ver"
+				version="$real_ver"
+			fi
 		fi
-		if [[ "${stock_file##*.}" == "apkm" && -f "$check_apk" ]]; then rm -f "$check_apk"; fi
+		rm -rf "${stock_apk}-aapt" 2>/dev/null || :
 	fi
 	# =====================================================================
 
