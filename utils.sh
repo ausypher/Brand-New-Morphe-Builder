@@ -629,24 +629,6 @@ isoneof() {
 	return 1
 }
 
-merge_splits() {
-	local bundle=$1 output=$2
-	pr "Merging splits"
-	gh_dl "$TEMP_DIR/apkeditor.jar" "https://github.com/REAndroid/APKEditor/releases/download/V1.4.9/APKEditor-1.4.9.jar" >/dev/null || return 1
-	
-	if ! OP=$(java -jar "$TEMP_DIR/apkeditor.jar" merge -i "$bundle" -o "${output}-unsigned" -clean-meta -f 2>&1); then
-		epr "APKEditor error: $OP"
-		return 1
-	fi
-	if ! OP=$(java -jar "$APKSIGNER" sign --ks ks-p12.keystore --ks-pass pass:123456789 --key-pass pass:123456789 --ks-key-alias jhc \
-		--out "${output}" "${output}-unsigned"); then
-		epr "apksigner error: $OP"
-		return 1
-	fi
-	rm "${output}.idsig" "${output}-unsigned" 2>/dev/null || :
-	return 0
-}
-
 patch_apk() {
 	local stock_input=$1 patched_apk=$2 patcher_args=$3 cli_jar=$4 patches_jars=$5
 	local tmp_files
@@ -1428,11 +1410,7 @@ dl_github() {
 	if ! run_python_backend "github_dl" "$url" "$version" "$output" "$arch" "$dpi" "$vcode" >/dev/null; then
 		return 1
 	fi
-
-	if [[ -f "${output}.is_bundle" && "$(cat "${output}.is_bundle")" == "true" ]] || [[ -f "${output}.apkm.is_bundle" ]]; then
-		merge_splits "${output}.apkm" "${output}"
-	fi
-	[[ -f "$output" ]]
+	[[ -f "$output" || -f "${output}.apkm" ]]
 }
 
 # -------------------- apkmirror wrappers --------------------
@@ -1464,20 +1442,13 @@ get_apkmirror_vers() { run_python_backend "apkmirror_vers" "${__APKMIRROR_URL__:
 
 dl_apkmirror() {
 	local url="${1%/}" version=$2 output=$3 arch=$4 dpi=$5 vcode=${6:-}
-	if [ -f "${output}.apkm" ]; then
-		merge_splits "${output}.apkm" "${output}"
-		return 0
-	fi
+	if [[ -f "${output}.apkm" || -f "${output}" ]]; then return 0; fi
 	rm -f "${output}.is_bundle" "${output}.apkm.is_bundle"
 	
 	if ! run_python_backend "apkmirror_dl" "$url" "$version" "$output" "$arch" "$dpi" "$vcode" >/dev/null; then
 		return 1
 	fi
-	
-	if [[ -f "${output}.is_bundle" && "$(cat "${output}.is_bundle")" == "true" ]] || [[ -f "${output}.apkm.is_bundle" ]]; then
-		merge_splits "${output}.apkm" "${output}"
-	fi
-	[[ -f "$output" ]]
+	[[ -f "$output" || -f "${output}.apkm" ]]
 }
 
 # -------------------- uptodown wrappers --------------------
@@ -1513,11 +1484,7 @@ dl_uptodown() {
 	if ! run_python_backend "uptodown_dl" "$url" "$version" "$output" "$arch" "$dpi" "$vcode" >/dev/null; then
 		return 1
 	fi
-	
-	if [[ -f "${output}.is_bundle" && "$(cat "${output}.is_bundle")" == "true" ]] || [[ -f "${output}.apkm.is_bundle" ]]; then
-		merge_splits "${output}.apkm" "${output}"
-	fi
-	[[ -f "$output" ]]
+	[[ -f "$output" || -f "${output}.apkm" ]]
 }
 
 # -------------------- archive --------------------
@@ -1526,10 +1493,7 @@ dl_archive() {
 	local path output_m version=${version// /}
 	local version_f=${version#v}
 
-	if [ -f "${output}.apkm" ]; then
-		merge_splits "${output}.apkm" "$output"
-		return 0
-	fi
+	if [[ -f "${output}.apkm" || -f "${output}" ]]; then return 0; fi
 
 	local arch_query="${arch// /}"
 	if [ "$arch_query" = "arm-v7a" ]; then arch_query="armeabi-v7a"; fi
@@ -1542,7 +1506,6 @@ dl_archive() {
 
 	if [ "${path##*.}" = "apkm" ]; then
 		req "${url}/${path}" "${output}.apkm" || return 1
-		merge_splits "${output}.apkm" "$output"
 	else
 		req "${url}/${path}" "${output}" || return 1
 	fi
@@ -1566,7 +1529,6 @@ dl_direct() {
 	fi
 	if [[ "${url##*.}" == "apkm" ]]; then
 		req "$url" "${output}.apkm" || return 1
-		merge_splits "${output}.apkm" "$output"
 	else
 		req "$url" "${output}" || return 1
 	fi
@@ -1702,7 +1664,15 @@ build_rv() {
 	fi
 
 	local stock_apk="${TEMP_DIR}/${pkg_name}-${version_f}-${arch_f}.apk"
-	if [[ ! -f "$stock_apk" ]]; then
+	local stock_file=""
+	
+	if [[ -f "${stock_apk}.apkm" ]]; then
+		stock_file="${stock_apk}.apkm"
+	elif [[ -f "${stock_apk}" ]]; then
+		stock_file="${stock_apk}"
+	fi
+
+	if [[ -z "$stock_file" ]]; then
 		for dl_p in "${DL_SRCS[@]}"; do
 			if [[ -z "${args[${dl_p}_dlurl]:-}" ]]; then continue; fi
 			pr "Downloading '${table}' from '${dl_p}'"
@@ -1716,18 +1686,19 @@ build_rv() {
 				epr "ERROR: Could not download '${table}' from '${dl_p}' with version '${version_f}', arch '${arch}', dpi '${args[dpi]:-}'"
 				continue
 			fi
-			break
+			if [[ -f "${stock_apk}.apkm" ]]; then stock_file="${stock_apk}.apkm"; break; fi
+			if [[ -f "${stock_apk}" ]]; then stock_file="${stock_apk}"; break; fi
 		done
-		if [[ ! -f "$stock_apk" ]]; then
+		if [[ -z "$stock_file" ]]; then
 			epr "Stock apk not found ($stock_apk)"
 			return 0
 		fi
 	fi
 
 	local sig_op
-	if [[ -f "${stock_apk}.apkm" ]]; then
+	if [[ "${stock_file##*.}" == "apkm" ]]; then
 		rm -rf "${stock_apk}-zip" || :
-		unzip -o -q -j "${stock_apk}.apkm" -d "${stock_apk}-zip" >/dev/null 2>&1
+		unzip -o -q -j "${stock_file}" -d "${stock_apk}-zip" >/dev/null 2>&1
 		for a in "${stock_apk}"-zip/*.apk; do
 			if ! sig_op=$(check_sig "$a" "$pkg_name" 2>&1); then
 				epr "Not building $table, apk signature mismatch '$a': $sig_op"
@@ -1736,8 +1707,8 @@ build_rv() {
 		done
 		rm -rf "${stock_apk}-zip" || :
 	else
-		if ! sig_op=$(check_sig "$stock_apk" "$pkg_name" 2>&1); then
-			epr "Not building $table, apk signature mismatch '$stock_apk': $sig_op"
+		if ! sig_op=$(check_sig "$stock_file" "$pkg_name" 2>&1); then
+			epr "Not building $table, apk signature mismatch '$stock_file': $sig_op"
 			return 0
 		fi
 	fi
@@ -1751,27 +1722,33 @@ build_rv() {
 	
 	if [[ -n "$aapt_bin" && -x "$aapt_bin" ]]; then
 		local real_ver
-		real_ver=$("$aapt_bin" dump badging "$stock_apk" 2>/dev/null | grep -m1 "versionName=" | sed -E "s/.*versionName='([^']+)'.*/\1/")
+		local check_apk="$stock_file"
+		if [[ "${stock_file##*.}" == "apkm" ]]; then
+			unzip -o -q -j "${stock_file}" "base.apk" -d "$TEMP_DIR" >/dev/null 2>&1 || unzip -o -q -j "${stock_file}" "*.apk" -d "$TEMP_DIR" >/dev/null 2>&1
+			check_apk=$(ls "$TEMP_DIR"/base.apk 2>/dev/null || ls "$TEMP_DIR"/*.apk 2>/dev/null | head -1)
+		fi
+		real_ver=$("$aapt_bin" dump badging "$check_apk" 2>/dev/null | grep -m1 "versionName=" | sed -E "s/.*versionName='([^']+)'.*/\1/")
 		if [[ -n "$real_ver" ]]; then 
 			version_f="$real_ver"
 			version="$real_ver"
 		fi
+		if [[ "${stock_file##*.}" == "apkm" && -f "$check_apk" ]]; then rm -f "$check_apk"; fi
 	fi
 	# =====================================================================
 
 	log "📱 » **${table}** (${arch_f}): \`${version_f}\`  "
 
 	local microg_patch
-	microg_patch=$(grep "^Name: " <<<"$list_patches" | grep -i "gmscore\|microg" || :) microg_patch=${microg_patch#*: }
-	if [[ -n "$microg_patch" && ${p_patcher_args[*]} =~ $microg_patch ]]; then
+	microg_patch=$(grep "^Name: " <<<"$list_patches" \vert{} grep -i "gmscore\Vert{}microg" \vert{}\vert{} :) microg_patch=${microg_patch#*: }
+	if [[ -n "$microg_patch" && ${p_patcher_args[*]} =~$microg_patch ]]; then
 		wpr "You cant include/exclude microg patch as that's done by rvmm builder automatically."
-		p_patcher_args=("${p_patcher_args[@]//-[ei] ${microg_patch}/}")
+		p_patcher_args=("${p_patcher_args[@]//-[ei]${microg_patch}/}")
 	fi
 
 	local patcher_args patched_apk build_mode
 	local rv_brand_f
-	rv_brand_f=$(iconv -f utf-8 -t ascii//TRANSLIT <<<"${args[rv_brand]}" 2>/dev/null || echo "${args[rv_brand]}")
-	rv_brand_f=$(echo "$rv_brand_f" | tr '[:upper:]' '[:lower:]' | sed -E 's/[^a-z0-9]+/-/g' | sed -E 's/^-+|-+$//g')
+	rv_brand_f=$(iconv -f utf-8 -t ascii//TRANSLIT <<<"${args[rv_brand]}" 2>/dev/null \vert{}\vert{} echo "${args[rv_brand]}")
+	rv_brand_f=$(echo "$rv_brand_f" \vert{} tr '[:upper:]' '[:lower:]' \vert{} sed -E 's/[^a-z0-9]+/-/g' \vert{} sed -E 's/^-+\vert{}-+$//g')
 	if [[ -n "${args[patcher_args]:-}" ]]; then p_patcher_args+=("${args[patcher_args]}"); fi
 	for build_mode in "${build_mode_arr[@]}"; do
 		patcher_args=("${p_patcher_args[@]}")
@@ -1797,32 +1774,37 @@ build_rv() {
 			fi
 		fi
 
-		local stock_apk_to_patch="${stock_apk}.stripped.apk"
-		cp -f "$stock_apk" "$stock_apk_to_patch"
-		if [[ "$build_mode" == module ]]; then
-			zip -d "$stock_apk_to_patch" "lib/*" >/dev/null 2>&1 || :
-		else
-			if [[ "$arch" == "arm64-v8a" ]]; then
-				zip -d "$stock_apk_to_patch" "lib/armeabi-v7a/*" "lib/x86_64/*" "lib/x86/*" >/dev/null 2>&1 || :
-			elif [[ "$arch" == "arm-v7a" ]]; then
-				zip -d "$stock_apk_to_patch" "lib/arm64-v8a/*" "lib/x86_64/*" "lib/x86/*" >/dev/null 2>&1 || :
-			elif [[ "$arch" == "x86" ]]; then
-				zip -d "$stock_apk_to_patch" "lib/arm64-v8a/*" "lib/x86_64/*" "lib/armeabi-v7a/*" >/dev/null 2>&1 || :
-			elif [[ "$arch" == "x86_64" ]]; then
-				zip -d "$stock_apk_to_patch" "lib/arm64-v8a/*" "lib/armeabi-v7a/*" "lib/x86/*" >/dev/null 2>&1 || :
-			else
-				zip -d "$stock_apk_to_patch" "lib/x86_64/*" "lib/x86/*" >/dev/null 2>&1 || :
-			fi
-		fi
-
 		local apk_output="${BUILD_DIR}/${app_name_l}-${rv_brand_f}-v${version_f}-${arch_f}.apk"
 		if [[ "${NORB:-}" != true || ( ! -f "$patched_apk" && ! -f "$apk_output" ) ]]; then
-			if ! patch_apk "$stock_apk_to_patch" "$patched_apk" "${patcher_args[*]}" "${args[cli]}" "${args[ptjar]}"; then
+			if ! patch_apk "$stock_file" "$patched_apk" "${patcher_args[*]}" "${args[cli]}" "${args[ptjar]}"; then
 				epr "Building '${table}' failed!"
 				return 0
 			fi
+			
+			# Strip specific architectures from the patched APK depending on build mode. 
+			local stripped=false
+			if [[ "$build_mode" == module ]]; then
+				zip -d "$patched_apk" "lib/*" >/dev/null 2>&1 && stripped=true || :
+			else
+				if [[ "$arch" == "arm64-v8a" ]]; then
+					zip -d "$patched_apk" "lib/armeabi-v7a/*" "lib/x86_64/*" "lib/x86/*" >/dev/null 2>&1 && stripped=true || :
+				elif [[ "$arch" == "arm-v7a" ]]; then
+					zip -d "$patched_apk" "lib/arm64-v8a/*" "lib/x86_64/*" "lib/x86/*" >/dev/null 2>&1 && stripped=true || :
+				elif [[ "$arch" == "x86" ]]; then
+					zip -d "$patched_apk" "lib/arm64-v8a/*" "lib/x86_64/*" "lib/armeabi-v7a/*" >/dev/null 2>&1 && stripped=true || :
+				elif [[ "$arch" == "x86_64" ]]; then
+					zip -d "$patched_apk" "lib/arm64-v8a/*" "lib/armeabi-v7a/*" "lib/x86/*" >/dev/null 2>&1 && stripped=true || :
+				else
+					zip -d "$patched_apk" "lib/x86_64/*" "lib/x86/*" >/dev/null 2>&1 && stripped=true || :
+				fi
+			fi
+
+			if [[ "$stripped" == true ]]; then
+				# zip -d breaks the v2/v3 signature so we must re-sign the patched apk
+				java -jar "$APKSIGNER" sign --ks ks.keystore --ks-pass pass:123456789 --key-pass pass:123456789 --ks-key-alias jhc --out "$patched_apk" "$patched_apk"
+			fi
 		fi
-		rm "$stock_apk_to_patch"
+
 		if [[ "$build_mode" == apk ]]; then
 			if [[ "${NORB:-}" != true || ( ! -f "$patched_apk" && ! -f "$apk_output" ) ]]; then
 				mv -f "$patched_apk" "$apk_output"
@@ -1832,6 +1814,7 @@ build_rv() {
 			pr "Built ${table} (non-root): '${apk_output}'"
 			continue
 		fi
+		
 		local base_template
 		base_template=$(mktemp -d -p "$TEMP_DIR")
 		cp -a $MODULE_TEMPLATE_DIR/. "$base_template"
@@ -1856,9 +1839,9 @@ build_rv() {
 
 		module_prop \
 			"${args[module_prop_name]:-}" \
-			"${app_name} ${args[rv_brand]:-}" \
-			"${version_f} (Patch ${patches_ver})" \
-			"${app_name} ${args[rv_brand]:-} module" \
+			"${app_name}${args[rv_brand]:-}" \
+			"${version_f} (Patch${patches_ver})" \
+			"${app_name}${args[rv_brand]:-} module" \
 			"https://raw.githubusercontent.com/${GITHUB_REPOSITORY-}/update/${upj}" \
 			"$base_template"
 
@@ -1869,27 +1852,30 @@ build_rv() {
 		if [[ "${args[include_stock]:-}" != "disable" ]]; then
 			mkdir -p "${base_template}/stock/"
 			if [[ "${args[include_stock]:-}" == "merged" ]]; then
-				cp -f "$stock_apk" "${base_template}/stock/base.apk"
+				if [[ "${stock_file##*.}" == "apk" ]]; then
+					cp -f "$stock_file" "${base_template}/stock/base.apk"
+				else
+					epr "Cannot use include-stock='merged' with a bundle. Please use 'split' in config.toml for $table."
+					return 0
+				fi
 			elif [[ "${args[include_stock]:-}" == "split" ]]; then
-				if [[ -f "${stock_apk}.apkm" ]]; then
+				if [[ "${stock_file##*.}" == "apkm" ]]; then
 					if [[ "$arch" == "arm64-v8a" ]]; then
-						unzip -j "${stock_apk}.apkm" '*.apk' -x '*x86_64.apk' -x '*x86.apk' -x '*armeabi_v7a.apk' -d "${base_template}/stock/" >/dev/null 2>&1
+						unzip -j "${stock_file}" '*.apk' -x '*x86_64.apk' -x '*x86.apk' -x '*armeabi_v7a.apk' -d "${base_template}/stock/" >/dev/null 2>&1
 					elif [[ "$arch" == "arm-v7a" ]]; then
-						unzip -j "${stock_apk}.apkm" '*.apk' -x '*x86_64.apk' -x '*x86.apk' -x '*arm64_v8a.apk' -d "${base_template}/stock/" >/dev/null 2>&1
+						unzip -j "${stock_file}" '*.apk' -x '*x86_64.apk' -x '*x86.apk' -x '*arm64_v8a.apk' -d "${base_template}/stock/" >/dev/null 2>&1
 					elif [[ "$arch" == "x86" ]]; then
-						unzip -j "${stock_apk}.apkm" '*.apk' -x '*x86_64.apk' -x '*arm64_v8a.apk' -x '*armeabi_v7a.apk' -d "${base_template}/stock/" >/dev/null 2>&1
+						unzip -j "${stock_file}" '*.apk' -x '*x86_64.apk' -x '*arm64_v8a.apk' -x '*armeabi_v7a.apk' -d "${base_template}/stock/" >/dev/null 2>&1
 					elif [[ "$arch" == "x86_64" ]]; then
-						unzip -j "${stock_apk}.apkm" '*.apk' -x '*x86.apk' -x '*arm64_v8a.apk' -x '*armeabi_v7a.apk' -d "${base_template}/stock/" >/dev/null 2>&1
+						unzip -j "${stock_file}" '*.apk' -x '*x86.apk' -x '*arm64_v8a.apk' -x '*armeabi_v7a.apk' -d "${base_template}/stock/" >/dev/null 2>&1
 					else
-						unzip -j "${stock_apk}.apkm" '*.apk' -x '*x86_64.apk' -x '*x86.apk' -d "${base_template}/stock/" >/dev/null 2>&1
+						unzip -j "${stock_file}" '*.apk' -x '*x86_64.apk' -x '*x86.apk' -d "${base_template}/stock/" >/dev/null 2>&1
 					fi
 				else
-					# Downloaded file is already a single untouched APK with original signatures
-					cp -f "$stock_apk" "${base_template}/stock/base.apk"
+					cp -f "$stock_file" "${base_template}/stock/base.apk"
 				fi
 			fi
 		fi
-
 
 		pushd >/dev/null "$base_template" || abort "Module template dir not found"
 		zip -"$COMPRESSION_LEVEL" -FSqr "${CWD}/${BUILD_DIR}/${module_output}" .
@@ -1899,7 +1885,7 @@ build_rv() {
 }
 
 list_args() { tr -d '\t\r' <<<"$1" | tr -s ' ' | sed 's/" "/"\n"/g' | sed 's/\([^"]\)"\([^"]\)/\1'\''\2/g' | grep -v '^$' || :; }
-join_args() { list_args "$1" | sed "s/^/${2} /" | paste -sd " " - || :; }
+join_args() { list_args "$1" \vert{} sed "s/^/${2} /" | paste -sd " " - || :; }
 
 module_config() {
 	local ma=""
