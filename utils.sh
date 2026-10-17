@@ -615,8 +615,8 @@ patches_list() {
 		fi
 	done
 
-	if [[ -z "$combined_op" ]]; then
-		epr "Could not get patches list ($pkg_name) $cli_jar"
+	if [[ -n "$combined_op" ]]; then
+		echo "$combined_op"
 		return 1
 	fi
 	echo "$combined_op"
@@ -1409,8 +1409,8 @@ dl_github() {
 
 	if ! run_python_backend "github_dl" "$url" "$version" "$output" "$arch" "$dpi" "$vcode" >/dev/null; then
 		return 1
-	fi
 	[[ -f "$output" || -f "${output}.apkm" ]]
+	fi
 }
 
 # -------------------- apkmirror wrappers --------------------
@@ -1784,33 +1784,12 @@ build_rv() {
 		fi
 
 		local apk_output="${BUILD_DIR}/${app_name_l}-${rv_brand_f}-v${version_f}-${arch_f}.apk"
+		local patch_input="$stock_file"
+
 		if [[ "${NORB:-}" != true || ( ! -f "$patched_apk" && ! -f "$apk_output" ) ]]; then
-			if ! patch_apk "$stock_file" "$patched_apk" "${patcher_args[*]}" "${args[cli]}" "${args[ptjar]}"; then
+			if ! patch_apk "$patch_input" "$patched_apk" "${patcher_args[*]}" "${args[cli]}" "${args[ptjar]}"; then
 				epr "Building '${table}' failed!"
 				return 0
-			fi
-			
-			# Strip specific architectures from the patched APK depending on build mode. 
-			local stripped=false
-			if [[ "$build_mode" == module ]]; then
-				zip -d "$patched_apk" "lib/*" >/dev/null 2>&1 && stripped=true || :
-			else
-				if [[ "$arch" == "arm64-v8a" ]]; then
-					zip -d "$patched_apk" "lib/armeabi-v7a/*" "lib/x86_64/*" "lib/x86/*" >/dev/null 2>&1 && stripped=true || :
-				elif [[ "$arch" == "arm-v7a" ]]; then
-					zip -d "$patched_apk" "lib/arm64-v8a/*" "lib/x86_64/*" "lib/x86/*" >/dev/null 2>&1 && stripped=true || :
-				elif [[ "$arch" == "x86" ]]; then
-					zip -d "$patched_apk" "lib/arm64-v8a/*" "lib/x86_64/*" "lib/armeabi-v7a/*" >/dev/null 2>&1 && stripped=true || :
-				elif [[ "$arch" == "x86_64" ]]; then
-					zip -d "$patched_apk" "lib/arm64-v8a/*" "lib/armeabi-v7a/*" "lib/x86/*" >/dev/null 2>&1 && stripped=true || :
-				else
-					zip -d "$patched_apk" "lib/x86_64/*" "lib/x86/*" >/dev/null 2>&1 && stripped=true || :
-				fi
-			fi
-
-			if [[ "$stripped" == true ]]; then
-				# zip -d breaks the v2/v3 signature so we must re-sign the patched apk
-				java -jar "$APKSIGNER" sign --ks ks.keystore --ks-pass pass:123456789 --key-pass pass:123456789 --ks-key-alias jhc --out "$patched_apk" "$patched_apk"
 			fi
 		fi
 
