@@ -19,18 +19,18 @@
 
 ---
 
-## 🌟 Features & Improvements
+## 🌟 Features & Advanced Engineering
 
-* **Custom Root Module Banners**: Built-in visual branding for Magisk, KernelSU, and APatch root managers across supported targets.
-* **Dual-Host Toolchain Fetching (`github:` & `gitlab:`)**: Dynamically pulls patch bundles and CLI binaries across GitHub Releases and GitLab APIs using uniform URI prefixes.
-* **Multi-Bundle Compilation**: Merges multiple independent patch sets (e.g. `crimera/piko` + secondary shims) into a single patching run.
-* **5-Tier Fallback Download Engine**: Automatically resolves APK assets via an intelligent cascading pipeline:
-  $$\text{APKMirror} \longrightarrow \text{Uptodown} \longrightarrow \text{GitHub Releases} \longrightarrow \text{Direct DL} \longrightarrow \text{Archive.org}$$
-* **Version Code & Suffix Targeting**: Allows specifying an exact `version-code` or target release suffix in `config.toml`, falling back to patch-recommended versions when omitted.
-* **Untampered Stock Signatures (`include-stock = "split"`)**: Preserves original developer signatures (Google, Meta) inside root modules to prevent Google Play Services verification crashes and `INSTALL_FAILED_DUPLICATE_PERMISSION` errors.
-* **Autonomous Python Scraping Backend**: Cloudflare-resilient downloading engine powered by `curl_cffi` and local solver integration.
-* **AAPT2 Badging & Auto-Force**: Extracts true `versionName` attributes directly from downloaded binaries and automatically forces compilation through version-mismatch checks.
-* **Multi-Architecture Matrix Compilation (`arch = "both"`)**: Concurrently packages architecture-tailored APKs and universal root modules (`arm64-v8a`, `armeabi-v7a`, `x86_64`).
+* **Native Bundle Processing:** Feeds `.apkm`, `.xapk`, and `.zip` split bundles directly into the modern Morphe CLI, completely eliminating outdated external `APKEditor.jar` dependencies for faster, safer merges.
+* **Pristine Signature Preservation (`include-stock = "split"`):** Guarantees original developer signatures (Google, Meta) remain 100% untouched inside root modules. This flawlessly prevents Google Play Services `PackageVerificationRslt` crashes and Meta `INSTALL_FAILED_DUPLICATE_PERMISSION` errors.
+* **Smart Post-Patch Architecture Stripping:** Dynamically strips unnecessary ABI folders (`x86`, `armeabi-v7a`) from the final patched output, meticulously preserving strict 4-byte/16KB `zipalign` boundaries while significantly reducing module bloat.
+* **5-Tier Fallback Download Engine:** Automatically resolves APK assets via an intelligent cascading pipeline: $\text{APKMirror} \longrightarrow \text{Uptodown} \longrightarrow \text{GitHub Releases} \longrightarrow \text{Direct DL} \longrightarrow \text{Archive.org}$
+* **Autonomous Python Scraping Backend:** Cloudflare-resilient downloading engine natively powered by `curl_cffi` and local Docker solver integration.
+* **Dual-Host Toolchain Fetching (`github:` & `gitlab:`):** Dynamically pulls patch bundles and CLI binaries across GitHub Releases and GitLab APIs using uniform URI prefixes.
+* **Multi-Bundle Compilation:** Merges multiple independent patch sets (e.g., `crimera/piko` + secondary shims) into a single, cohesive patching run.
+* **Version Code & Suffix Targeting:** Allows specifying an exact `version-code` or target release suffix in `config.toml`, forcefully pinning specific builds and bypassing ambiguous version numbering.
+* **AAPT2 Badging & Auto-Force:** Extracts true `versionName` attributes directly from downloaded binaries and automatically forces compilation through patch version mismatches.
+* **Multi-Architecture Matrix Compilation (`arch = "both"`):** Concurrently packages architecture-tailored APKs and universal root modules (`arm64-v8a`, `armeabi-v7a`, `x86_64`).
 
 ---
 
@@ -62,11 +62,11 @@
 ### Non-Root Users
 1. Download and install [ReVanced GmsCore](https://github.com/ReVanced/GmsCore/releases/latest) or [Morphe MicroG-RE](https://github.com/MorpheApp/MicroG-RE/releases/latest).
 2. Download your preferred patched APK from the [Releases Page](../../releases/latest).
-3. *(Optional)* Import custom presets via in-app settings.
+3. *(Optional)* Import custom clean presets via the in-app settings menu.
 
 ### Root Users (Magisk / KernelSU / APatch)
 1. Flash the generated `.zip` module from the [Releases Page](../../releases/latest) in your root manager.
-2. The module automatically handles base installation, library extraction, and mounting without requiring a reboot.
+2. The module automatically handles base installation, library extraction, and mounting without requiring a reboot. Native detection is included for `rvmm-zygisk-mount` to prevent mount conflicts.
 3. *(Optional)* Use [zygisk-detach](https://github.com/j-hc/zygisk-detach) to detach YouTube and YT Music from Google Play Store auto-updates.
 
 ---
