@@ -230,7 +230,7 @@ apkmirror-dlurl = "https://www.apkmirror.com/apk/facebook-technologies-llc/faceb
 uptodown-dlurl = "https://facebook.en.uptodown.com/android"
 
 [Facebook-SysAdminDoc-APK]
-enabled = false
+enabled = true
 app-name = "Facebook"
 pkg-name = "com.facebook.katana"
 patches-source = "github:SysAdminDoc/Hushfacebook"
@@ -263,7 +263,7 @@ apkmirror-dlurl = "https://www.apkmirror.com/apk/facebook-technologies-llc/faceb
 uptodown-dlurl = "https://facebook.en.uptodown.com/android"
 
 [Facebook-SysAdminDoc-Root]
-enabled = false
+enabled = true
 app-name = "Facebook"
 pkg-name = "com.facebook.katana"
 patches-source = "github:SysAdminDoc/Hushfacebook"
@@ -333,7 +333,7 @@ apkmirror-dlurl = "https://www.apkmirror.com/apk/facebook-technologies-llc/messe
 uptodown-dlurl = "https://facebook-messenger.en.uptodown.com/android"
 
 [Facebook-Messenger-SysAdminDoc]
-enabled = false
+enabled = true
 app-name = "Facebook Messenger"
 pkg-name = "com.facebook.orca"
 patches-source = "github:SysAdminDoc/HushMessenger"
@@ -368,7 +368,7 @@ apkmirror-dlurl = "https://www.apkmirror.com/apk/instagram/threads-an-instagram-
 uptodown-dlurl = "https://threads.en.uptodown.com/android"
 
 [Threads-SysAdminDoc]
-enabled = true
+enabled = false
 app-name = "Threads"
 pkg-name = "com.instagram.barcelona"
 patches-source = "github:SysAdminDoc/HushThreads"
@@ -493,7 +493,7 @@ uptodown-dlurl = "https://instagram.en.uptodown.com/android"
 github-dlurl = "https://github.com/dj-tanjid/AppRepo/releases/tag/com.instagram.android"
 
 [Instagram-SysAdminDoc-APK]
-enabled = false
+enabled = true
 app-name = "Instagram"
 patches-source = "github:SysAdminDoc/HushGram"
 cli-source = "github:MorpheApp/morphe-desktop"
@@ -529,7 +529,7 @@ uptodown-dlurl = "https://instagram.en.uptodown.com/android"
 github-dlurl = "https://github.com/dj-tanjid/AppRepo/releases/tag/com.instagram.android"
 
 [Instagram-SysAdminDoc-Root]
-enabled = false
+enabled = true
 app-name = "Instagram"
 patches-source = "github:SysAdminDoc/HushGram"
 cli-source = "github:MorpheApp/morphe-desktop"
