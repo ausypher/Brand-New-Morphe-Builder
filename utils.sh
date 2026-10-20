@@ -1829,11 +1829,12 @@ build_rv() {
 
 		module_prop \
 			"${args[module_prop_name]:-}" \
-			"${app_name}${args[rv_brand]:-}" \
-			"${version_f} (Patch${patches_ver})" \
-			"${app_name}${args[rv_brand]:-} module" \
+			"${app_name} ${args[rv_brand]:-}" \
+			"${version_f} (Patch ${patches_ver})" \
+			"${app_name} ${args[rv_brand]:-} module" \
 			"https://raw.githubusercontent.com/${GITHUB_REPOSITORY-}/update/${upj}" \
 			"$base_template"
+
 
 		local module_output="${app_name_l}-${rv_brand_f}-module-v${version_f}-${arch_f}.zip"
 		pr "Packing module ${table}"
