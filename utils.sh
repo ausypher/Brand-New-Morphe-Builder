@@ -1735,12 +1735,14 @@ build_rv() {
 			check_apk=$(find "${stock_apk}-aapt" -name "*.apk" | head -1)
 		fi
 		if [[ -n "$check_apk" && -f "$check_apk" ]]; then
-			real_ver=$("$aapt_bin" dump badging "$check_apk" 2>/dev/null | grep -m1 "versionName=" | sed -E "s/.*versionName='([^']+)'.*/\1/")
+			# ( ... || true) safely catches the SIGPIPE from grep -m1 closing the pipe early
+			real_ver=$( ("$aapt_bin" dump badging "$check_apk" 2>/dev/null || true) | grep -m1 "versionName=" | sed -E "s/.*versionName='([^']+)'.*/\1/" )
 			if [[ -n "$real_ver" ]]; then
 				version_f="$real_ver"
 				version="$real_ver"
 			fi
 		fi
+
 		rm -rf "${stock_apk}-aapt" 2>/dev/null || :
 	fi
 	# =====================================================================
