@@ -798,6 +798,7 @@ uptodown-dlurl = "https://google-maps.en.uptodown.com/android"
 [Discord-Venus]
 enabled = true
 app-name = "Discord"
+pkg-name = "com.discord"
 patches-source = "github:VenusIsJaded/Venus-Patches"
 cli-source = "github:MorpheApp/morphe-desktop"
 rv-brand = "Venus"
