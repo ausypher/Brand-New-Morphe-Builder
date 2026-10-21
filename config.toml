@@ -631,6 +631,7 @@ rv-brand = "SatanMerde"
 arch = "both"
 version = "auto" # 'auto', 'experimental', 'latest' or a version number
 build-mode = "apk"
+include-stock = "split" # Options 'split', 'merged', or 'disable'
 # patches-version = "dev" # Options 'latest', 'dev', or A specific version tag
 apkmirror-dlurl = "https://www.apkmirror.com/apk/ookla/speedtest"
 uptodown-dlurl = "https://speedtest-net-mobile.en.uptodown.com/android"
@@ -695,6 +696,7 @@ rv-brand = "Jason"
 arch = "arm64-v8a"
 version = "auto" # 'auto', 'experimental', 'latest' or a version number
 build-mode = "both"
+include-stock = "split" # Options 'split', 'merged', or 'disable'
 patches-version = "dev" # Options 'latest', 'dev', or A specific version tag
 excluded-patches = """\
     'Package Rename' \
@@ -716,6 +718,7 @@ rv-brand = "Akshayykadam"
 # version = "11.0.073.972752740.32" # 'auto', 'experimental', 'latest' or a version number
 version = "auto"
 build-mode = "apk"
+include-stock = "split" # Options 'split', 'merged', or 'disable'
 # patches-version = "dev" # Options 'latest', 'dev', or A specific version tag
 apkmirror-dlurl = "https://www.apkmirror.com/apk/google-inc/camera/"
 uptodown-dlurl = "https://google-camera.en.uptodown.com/android"
@@ -731,6 +734,7 @@ rv-brand = "Akshayykadam"
 # version = "11.0.073.972752740.32" # 'auto', 'experimental', 'latest' or a version number
 version = "auto"
 build-mode = "apk"
+include-stock = "split" # Options 'split', 'merged', or 'disable'
 # patches-version = "dev" # Options 'latest', 'dev', or A specific version tag
 excluded-patches = """\
     '10x Viewfinder Quick Zoom' \
@@ -767,7 +771,8 @@ rv-brand = "SatanMerde"
 arch = "arm64-v8a"
 version = "auto" # 'auto', 'experimental', 'latest' or a version number
 build-mode = "apk"
-# patches-version = "dev" # Options 'latest', 'dev', or A specific version tag
+include-stock = "split" # Options 'split', 'merged', or 'disable'
+# patches-version = "dev" # Options 'latest', 'dev', or A spcific version tag
 included-patches = """\
     'Block Ads & Promo Screens - DeepL (Experimental)' \
     'Unlock Pro & Formality - DeepL (Experimental)' \
@@ -786,6 +791,7 @@ rv-brand = "BearInMindCat"
 arch = "arm64-v8a"
 version = "auto" # 'auto', 'experimental', 'latest' or a version number
 build-mode = "both"
+include-stock = "split" # Options 'split', 'merged', or 'disable'
 # patches-version = "dev" # Options 'latest', 'dev', or A specific version tag
 excluded-patches = """\
     'Change app name' \
@@ -805,6 +811,7 @@ rv-brand = "Venus"
 arch = "arm64-v8a"
 version = "auto" # 'auto', 'experimental', 'latest' or a version number
 build-mode = "both"
+include-stock = "split" # Options 'split', 'merged', or 'disable'
 # patches-version = "dev" # Options 'latest', 'dev', or A specific version tag
 apkmirror-dlurl = "https://www.apkmirror.com/apk/discord/discord-chat-for-gamers/"
 github-dlurl = "https://github.com/dj-tanjid/AppRepo/releases/tag/com.discord"
