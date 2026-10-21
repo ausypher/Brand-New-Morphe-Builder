@@ -4,7 +4,7 @@
 
 <p align="center">
   <b>Automated, high-performance CI/CD pipeline for building root Magisk/KernelSU modules and non-root APKs.</b><br>
-  Powered by <a href="https://github.com/MorpheApp">Morphe</a>, <a href="https://github.com/crimera/piko">Piko</a>, <a href="https://github.com/SysAdminDoc">SysAdminDoc</a>, <a href="https://github.com/RookieEnough/De-Vanced">De-Vanced</a>, and many more.
+  Powered by <a href="https://github.com/MorpheApp">Morphe</a>, <a href="https://github.com/crimera/piko">Piko</a>, <a href="https://github.com/SysAdminDoc">SysAdminDoc</a>, <a href="https://github.com/VenusIsJaded/Venus-Patches">Venus</a>, and many more.
 </p>
 
 [![Build Workflow](https://img.shields.io/github/actions/workflow/status/dj-tanjid/Brand-New-Morphe-Builder/build.yml?label=Build%20Status&logo=githubactions&logoColor=white)](../../actions/workflows/build.yml)
@@ -22,7 +22,7 @@
 ## 🌟 Features & Advanced Engineering
 
 * **Native Bundle Processing:** Feeds `.apkm`, `.xapk`, and `.zip` split bundles directly into the modern Morphe CLI, completely eliminating outdated external `APKEditor.jar` dependencies for faster, safer merges.
-* **Pristine Signature Preservation (`include-stock = "split"`):** Guarantees original developer signatures (Google, Meta) remain 100% untouched inside root modules. This flawlessly prevents Google Play Services `PackageVerificationRslt` crashes and Meta `INSTALL_FAILED_DUPLICATE_PERMISSION` errors.
+* **Pristine Signature Preservation (`include-stock = "split"`):** Guarantees original developer signatures (Google, Meta, Discord) remain 100% untouched inside root modules. This flawlessly prevents Google Play Services `PackageVerificationRslt` crashes and `INSTALL_FAILED_DUPLICATE_PERMISSION` errors.
 * **Smart Post-Patch Architecture Stripping:** Dynamically strips unnecessary ABI folders (`x86`, `armeabi-v7a`) from the final patched output, meticulously preserving strict 4-byte/16KB `zipalign` boundaries while significantly reducing module bloat.
 * **5-Tier Fallback Download Engine:** Automatically resolves APK assets via an intelligent cascading pipeline: $\text{APKMirror} \longrightarrow \text{Uptodown} \longrightarrow \text{GitHub Releases} \longrightarrow \text{Direct DL} \longrightarrow \text{Archive.org}$
 * **Autonomous Python Scraping Backend:** Cloudflare-resilient downloading engine natively powered by `curl_cffi` and local Docker solver integration.
@@ -42,6 +42,7 @@
 | **YouTube Music** | Morphe / Anddea | Non-Root APK + Root Module |
 | **Google Photos** | De-Vanced / Rushi / Akash | Non-Root APK + Root Module |
 | **Reddit** | Morphe | Non-Root APK + Root Module |
+| **Discord** | Venus | Non-Root APK + Root Module |
 | **Twitter / X** | Piko / Piko-NewX | Non-Root APK |
 | **Instagram** | SysAdminDoc / Piko | Non-Root APK + Root Module |
 | **Facebook & Messenger** | SysAdminDoc / De-Vanced / Froggo / Andrew | Non-Root APK + Root Module |
@@ -51,7 +52,7 @@
 | **Claude by Anthropic** | SatanMerde | Non-Root APK |
 | **DeepL** | SatanMerde | Non-Root APK |
 | **Google Maps** | BearInMindCat | Non-Root APK + Root Module |
-| **VPNs (1.1.1.1, Proton, Windscribe)** | Rushi / HXReborn | Non-Root APK |
+| **VPNs (1.1.1.1, Proton, Windscribe)** | Rushi / Rahaatul | Non-Root APK |
 | **Utilities (Speedtest, Send Files To TV, TeraBox)** | SatanMerde / Rushi / HXReborn | Non-Root APK |
 | **PokeRaid** | Dan1elTheMan1el / Nai64 | Non-Root APK |
 
@@ -87,10 +88,12 @@
 * [Morphe Team](https://github.com/MorpheApp) : Morphe patcher framework, CLI, and base integrations.
 * [ReVanced Team](https://github.com/ReVanced) : Original bytecode manipulation engine and patch foundations.
 * [Matthew Parker](https://github.com/SysAdminDoc) : Hushfacebook, HushMessenger, HushThreads, and HushGram patches.
+* [VenusIsJaded](https://github.com/VenusIsJaded) : Venus patches for Discord.
 * [crimera](https://github.com/crimera) : Piko and Piko-NewX patches for Twitter/X and Instagram.
 * [Sarthak Sinha (RookieEnough)](https://github.com/RookieEnough) : De-Vanced patches.
 * [SatanMerde](https://github.com/SatanMerde) : D-moniakPatches for Claude, DeepL, and Speedtest.
-* [HXReborn](https://github.com/hxreborn) : Morphe patches for Proton VPN and TeraBox.
+* [HXReborn](https://github.com/hxreborn) : Morphe patches for TeraBox.
+* [Rahaatul](https://github.com/rahaaatul) : Morphe patches for Proton VPN.
 * [Rushi Ranpise](https://github.com/rushiranpise) : Morphe patches for utility tools and VPNs.
 * [Aaron Veil (anddea)](https://github.com/anddea) : ReVanced Extended patches.
 * [Akshay Kadam (Akshayykadam)](https://github.com/Akshayykadam) : Pixel Camera optimization patches.
