@@ -782,21 +782,44 @@ included-patches = """\
 apkmirror-dlurl = "https://www.apkmirror.com/apk/deepl-se/deepl-translate/"
 uptodown-dlurl = "https://deepl.en.uptodown.com/android"
 
-[Google-Maps-BearInMindCat]
-enabled = false
+[Google-Maps-BearInMindCat-APK]
+enabled = true
 app-name = "Google Maps"
 patches-source = "github:bearinmindcat/morphe-patches"
 cli-source = "github:MorpheApp/morphe-desktop"
 rv-brand = "BearInMindCat"
 arch = "arm64-v8a"
 version = "auto" # 'auto', 'experimental', 'latest' or a version number
-build-mode = "both"
+build-mode = "apk"
+include-stock = "split" # Options 'split', 'merged', or 'disable'
+# patches-version = "dev" # Options 'latest', 'dev', or A specific version tag
+included-patches = """\
+    'Change app name' \
+    'Change package name' \
+    'Add microG support' \
+    'Bypass Play Services checks' \
+    """
+excluded-patches = """\
+    'Legacy icon' \
+    'Rectangle shapes' \
+    """
+apkmirror-dlurl = "https://www.apkmirror.com/apk/google-inc/maps/"
+uptodown-dlurl = "https://google-maps.en.uptodown.com/android"
+
+[Google-Maps-BearInMindCat-Root]
+enabled = true
+app-name = "Google Maps"
+patches-source = "github:bearinmindcat/morphe-patches"
+cli-source = "github:MorpheApp/morphe-desktop"
+rv-brand = "BearInMindCat"
+arch = "arm64-v8a"
+version = "auto" # 'auto', 'experimental', 'latest' or a version number
+build-mode = "module"
 include-stock = "split" # Options 'split', 'merged', or 'disable'
 # patches-version = "dev" # Options 'latest', 'dev', or A specific version tag
 excluded-patches = """\
-    'Change app name' \
-    'Change package name' \
     'Legacy icon' \
+    'Rectangle shapes' \
     """
 apkmirror-dlurl = "https://www.apkmirror.com/apk/google-inc/maps/"
 uptodown-dlurl = "https://google-maps.en.uptodown.com/android"
