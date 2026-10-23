@@ -821,6 +821,57 @@ excluded-patches = """\
 apkmirror-dlurl = "https://www.apkmirror.com/apk/google-inc/maps/"
 uptodown-dlurl = "https://google-maps.en.uptodown.com/android"
 
+[Waze-BearInMindCat-APK]
+enabled = true
+app-name = "Waze"
+patches-source = "github:bearinmindcat/morphe-patches"
+cli-source = "github:MorpheApp/morphe-desktop"
+rv-brand = "BearInMindCat"
+arch = "arm64-v8a"
+version = "auto" # 'auto', 'experimental', 'latest' or a version number
+build-mode = "apk"
+include-stock = "split" # Options 'split', 'merged', or 'disable'
+# patches-version = "dev" # Options 'latest', 'dev', or A specific version tag
+included-patches = """\
+    'All moods' \
+    'Alert distances' \
+    'Speed cameras everywhere' \
+    'Stay awake in the background' \
+    'Speed limit sign' \
+    'No AI reporting' \
+    'No Google Assistant' \
+    'Report speed limit' \
+    """
+apkmirror-dlurl = "https://www.apkmirror.com/apk/waze/"
+uptodown-dlurl = "https://waze.en.uptodown.com/android"
+
+[Waze-BearInMindCat-Root]
+enabled = true
+app-name = "Waze"
+patches-source = "github:bearinmindcat/morphe-patches"
+cli-source = "github:MorpheApp/morphe-desktop"
+rv-brand = "BearInMindCat"
+arch = "arm64-v8a"
+version = "auto" # 'auto', 'experimental', 'latest' or a version number
+build-mode = "module"
+include-stock = "split" # Options 'split', 'merged', or 'disable'
+# patches-version = "dev" # Options 'latest', 'dev', or A specific version tag
+included-patches = """\
+    'All moods' \
+    'Alert distances' \
+    'Speed cameras everywhere' \
+    'Stay awake in the background' \
+    'Speed limit sign' \
+    'No AI reporting' \
+    'No Google Assistant' \
+    'Report speed limit' \
+    """
+excluded-patches = """\
+    'Change app name' \
+    """
+apkmirror-dlurl = "https://www.apkmirror.com/apk/waze/"
+uptodown-dlurl = "https://waze.en.uptodown.com/android"
+
 [Discord-Venus]
 enabled = false
 app-name = "Discord"
