@@ -92,14 +92,14 @@
 * [crimera](https://github.com/crimera) : Piko and Piko-NewX patches for Twitter/X and Instagram.
 * [Sarthak Sinha (RookieEnough)](https://github.com/RookieEnough) : De-Vanced patches.
 * [SatanMerde](https://github.com/SatanMerde) : D-moniakPatches for Claude, DeepL, and Speedtest.
-* [HXReborn](https://github.com/hxreborn) : Morphe patches for TeraBox.
+* [HXReborn](https://github.com/hxreborn) : Morphe patches for & Proton VPN TeraBox.
 * [Rahaatul](https://github.com/rahaaatul) : Morphe patches for Proton VPN.
 * [Rushi Ranpise](https://github.com/rushiranpise) : Morphe patches for utility tools and VPNs.
 * [Aaron Veil (anddea)](https://github.com/anddea) : ReVanced Extended patches.
 * [Akshay Kadam (Akshayykadam)](https://github.com/Akshayykadam) : Pixel Camera optimization patches.
 * [Jason Wu](https://github.com/jasonwu1994) : Gboard optimization patches.
 * [Akash Sriram](https://github.com/Akash-Sriram) : Google Photos spoofing patches.
-* [bearinmindcat](https://github.com/bearinmindcat) : Google Maps patches.
+* [bearinmindcat](https://github.com/bearinmindcat) : Google Maps & Waze patches.
 * [Sapito Sucio](https://github.com/SapitoSucio) : Froggo patches for Facebook.
 * [Andrew Liang](https://github.com/andrewliang25) : Facebook layout patches.
 * [durgesh0505](https://github.com/durgesh0505) : Chiggi patches for Threads.
