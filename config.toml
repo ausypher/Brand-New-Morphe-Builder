@@ -796,6 +796,8 @@ include-stock = "split" # Options 'split', 'merged', or 'disable'
 excluded-patches = """\
     'Legacy icon' \
     'Rectangle shapes' \
+    'Add microG-RE support' \
+    'Add original microG support' \
     """
 apkmirror-dlurl = "https://www.apkmirror.com/apk/google-inc/maps/"
 uptodown-dlurl = "https://google-maps.en.uptodown.com/android"
