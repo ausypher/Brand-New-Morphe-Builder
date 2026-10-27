@@ -793,11 +793,13 @@ version = "auto" # 'auto', 'experimental', 'latest' or a version number
 build-mode = "apk"
 include-stock = "split" # Options 'split', 'merged', or 'disable'
 # patches-version = "dev" # Options 'latest', 'dev', or A specific version tag
+included-patches = """\
+    'Add microG-RE support' \
+    'Add original microG support' \
+    """
 excluded-patches = """\
     'Legacy icon' \
     'Rectangle shapes' \
-    'Add microG-RE support' \
-    'Add original microG support' \
     """
 apkmirror-dlurl = "https://www.apkmirror.com/apk/google-inc/maps/"
 uptodown-dlurl = "https://google-maps.en.uptodown.com/android"
@@ -819,6 +821,8 @@ excluded-patches = """\
     'Change app name' \
     'Change package name' \
     'Bypass Play Services checks' \
+    'Add microG-RE support' \
+    'Add original microG support' \
     """
 apkmirror-dlurl = "https://www.apkmirror.com/apk/google-inc/maps/"
 uptodown-dlurl = "https://google-maps.en.uptodown.com/android"
