@@ -1885,10 +1885,11 @@ module_config() {
 	elif [[ "$4" == "arm-v7a" ]]; then
 		ma="arm"
 	fi
-	echo "PKG_NAME=$2
-PKG_VER=$3
-MODULE_ARCH=$ma" >"$1/config"
+	echo "PKG_NAME=\"$2\"
+PKG_VER=\"$3\"
+MODULE_ARCH=\"$ma\"" >"$1/config"
 }
+
 module_prop() {
 	echo "id=${1}
 name=${2}
