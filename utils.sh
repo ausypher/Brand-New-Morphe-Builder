@@ -423,7 +423,7 @@ config_update() {
 						last_patches="${name_only}-${tag_name#v}.${name_ext}"
 					fi
 
-					if ! OP=$(grep -m1 "^Patches: ${org}/${last_patches}" build.md 2>/dev/null); then
+					if ! OP=$(grep -m1 "Patches: ${org}/${last_patches}" build.md 2>/dev/null); then
 						sources["$raw_src/$p_ver"]=1
 						prcfg=true
 						upped+=("$table_name")
