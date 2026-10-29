@@ -86,12 +86,38 @@ jobs:
           TAG: ${{ steps.next_ver_code.outputs.NEXT_VER_CODE }}
           BODY: ${{ steps.get_output.outputs.BUILD_LOG }}
         run: |
+          set -euo pipefail
           ls -lh ./build/*
+          RELEASE_TITLE=""
+          while IFS= read -r SECTION; do
+            [ -z "$SECTION" ] && continue
+            APP_NAME=$(sed -n '/^app-name[[:space:]]*=/s/^[^"]*"\(.*\)".*/\1/p' <<< "$SECTION" | head -n1)
+            BRAND=$(sed -n '/^rv-brand[[:space:]]*=/s/^[^"]*"\(.*\)".*/\1/p' <<< "$SECTION" | head -n1)
+            PATCH_VERSION=$(sed -n '/^patches-version[[:space:]]*=/s/^[^"]*"\(.*\)".*/\1/p' <<< "$SECTION" | head -n1)
+            [ -n "$APP_NAME" ] || continue
+            [ -n "$BRAND" ] || BRAND="Morphe"
+            [ -n "$PATCH_VERSION" ] || PATCH_VERSION="latest"
+            APP_TITLE="$APP_NAME ($BRAND $PATCH_VERSION)"
+            if [ -n "$RELEASE_TITLE" ]; then
+              RELEASE_TITLE="$RELEASE_TITLE x $APP_TITLE"
+            else
+              RELEASE_TITLE="$APP_TITLE"
+            fi
+          done < <(awk '
+            /^\[[^]]+\][[:space:]]*$/ {
+              if (section != "" && enabled == "true") print section
+              section=$0 "\n"; enabled=""; next
+            }
+            { section=section $0 "\n"; if ($0 ~ /^enabled[[:space:]]*=[[:space:]]*true([[:space:]]|$)/) enabled="true" }
+            END { if (section != "" && enabled == "true") print section }
+          ' config.toml | awk 'BEGIN { RS="\n\n" } { gsub(/\n/, "\n"); print }')
+          [ -n "$RELEASE_TITLE" ] || RELEASE_TITLE="Morphe build"
+          RELEASE_TITLE="$RELEASE_TITLE (R$TAG)"
           if gh release view "$TAG" >/dev/null 2>&1; then
-            gh release edit "$TAG" --title "Morphe x TanJid R${{ steps.next_ver_code.outputs.NEXT_VER_CODE }}" --notes "$BODY"
+            gh release edit "$TAG" --title "$RELEASE_TITLE" --notes "$BODY"
             gh release upload "$TAG" ./build/* --clobber
           else
-            gh release create "$TAG" ./build/* --title "Morphe x TanJid R${{ steps.next_ver_code.outputs.NEXT_VER_CODE }}" --notes "$BODY"
+            gh release create "$TAG" ./build/* --title "$RELEASE_TITLE" --notes "$BODY"
           fi
 
       - name: Update modules changelog and update json
