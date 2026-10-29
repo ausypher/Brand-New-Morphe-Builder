@@ -1332,41 +1332,45 @@ def main():
         if btn_variants and (data_version := btn_variants.get("data-version")):
             base_url = url.rsplit("/", 1)[0]
             _, r_files = scraper.get_soup(f"{base_url}/app/{data_code}/version/{data_version}/files")
-            files_html = json.loads(r_files.text).get("content", "") if r_files else ""
+            files_html = ""
+            if r_files and r_files.status_code == 200:
+                try:
+                    files_html = json.loads(r_files.text).get("content", "")
+                except (ValueError, TypeError) as e:
+                    log(f"Could not parse Uptodown APK variants response: {e}")
+
             soup_files = BeautifulSoup(files_html, 'html.parser')
             content = soup_files.select_one(".content")
-            
+
             matched_id = None
-            first_id = None
-            first_is_bundle = False
+            available_arches = []
             if content:
+                node_arch = ""
                 for child in content.children:
-                    if not getattr(child, "name", None): continue
-                    if "variant" not in child.get("class", []):
-                        node_arch = child.get_text(strip=True)
+                    if not getattr(child, "name", None):
                         continue
-                    
+                    if "variant" not in child.get("class", []):
+                        node_arch = child.get_text(" ", strip=True)
+                        continue
+
                     file_type_tag = child.select_one(".v-file > span")
                     cur_bundle = file_type_tag.get_text(strip=True).lower() == "xapk" if file_type_tag else False
                     v_rep = child.select_one(".v-report")
                     cur_id = v_rep["data-file-id"] if v_rep and "data-file-id" in v_rep.attrs else None
-                    if not cur_id: continue
+                    if not cur_id:
+                        continue
 
-                    if first_id is None:
-                        first_id = cur_id
-                        first_is_bundle = cur_bundle
-
+                    available_arches.append(node_arch or "unknown")
                     if is_arch_compat(node_arch, arch):
                         matched_id = cur_id
                         is_bundle = cur_bundle
                         break
 
-            if not matched_id and first_id:
-                matched_id = first_id
-                is_bundle = first_is_bundle
+            if not matched_id:
+                log(f"No Uptodown variant compatible with requested architecture '{arch}'. Available variants: {', '.join(available_arches) or 'none parsed'}")
+                sys.exit(1)
 
-            if matched_id:
-                soup_ver, _ = scraper.get_soup(f"{url}/download/{matched_id}-x")
+            soup_ver, _ = scraper.get_soup(f"{url}/download/{matched_id}-x")
 
         dl_btn = soup_ver.select_one("#detail-download-button") if soup_ver else None
         if not dl_btn or "data-url" not in dl_btn.attrs:
@@ -1374,7 +1378,8 @@ def main():
             sys.exit(1)
             
         dl_url = dl_btn["data-url"]
-        scraper.download(f"https://dw.uptodown.com/dwn/{dl_url}", dest_path, is_bundle, None)
+        download_url = urljoin("https://dw.uptodown.com/dwn/", dl_url)
+        scraper.download(download_url, dest_path, is_bundle, getattr(soup_ver, "url", None) or ver_url)
 
 if __name__ == "__main__":
     main()
