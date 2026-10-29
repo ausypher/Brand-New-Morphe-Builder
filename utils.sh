@@ -1326,6 +1326,7 @@ def main():
         ver_url = f"{ver_url_data.get('url', '')}/{ver_url_data.get('extraURL', '')}/{ver_url_data.get('versionID', '')}"
         soup_ver, _ = scraper.get_soup(ver_url)
         if not soup_ver: sys.exit(1)
+        download_referer = ver_url
         
         btn_variants = soup_ver.select_one(".button.variants")
 
@@ -1370,7 +1371,8 @@ def main():
                 log(f"No Uptodown variant compatible with requested architecture '{arch}'. Available variants: {', '.join(available_arches) or 'none parsed'}")
                 sys.exit(1)
 
-            soup_ver, _ = scraper.get_soup(f"{url}/download/{matched_id}-x")
+            download_referer = f"{url}/download/{matched_id}-x"
+            soup_ver, _ = scraper.get_soup(download_referer)
 
         dl_btn = soup_ver.select_one("#detail-download-button") if soup_ver else None
         if not dl_btn or "data-url" not in dl_btn.attrs:
@@ -1379,7 +1381,7 @@ def main():
             
         dl_url = dl_btn["data-url"]
         download_url = urljoin("https://dw.uptodown.com/dwn/", dl_url)
-        scraper.download(download_url, dest_path, is_bundle, getattr(soup_ver, "url", None) or ver_url)
+        scraper.download(download_url, dest_path, is_bundle, download_referer)
 
 if __name__ == "__main__":
     main()
