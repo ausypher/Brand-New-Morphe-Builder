@@ -62,7 +62,7 @@ jobs:
           if ! gh release view "$BASE_TAG" >/dev/null 2>&1; then
             RELEASE_TAG="$BASE_TAG"
           else
-            LAST_SUFFIX=$(gh release list --limit 100 --json tagName --jq --arg base "$BASE_TAG" '[.[].tagName | select(test("^" + $base + "-[0-9]+$")) | capture("^" + $base + "-(?<n>[0-9]+)$").n | tonumber] | max // 0')
+            LAST_SUFFIX=$(gh release list --limit 100 --json tagName | jq -r --arg base "$BASE_TAG" '[.[].tagName | select(test("^" + $base + "-[0-9]+$")) | capture("^" + $base + "-(?<n>[0-9]+)$").n | tonumber] | max // 0')
             RELEASE_TAG="$BASE_TAG-$((LAST_SUFFIX + 1))"
           fi
           echo "RELEASE_TAG=$RELEASE_TAG" >> "$GITHUB_OUTPUT"
