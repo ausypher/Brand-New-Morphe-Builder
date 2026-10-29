@@ -89,10 +89,19 @@ jobs:
           set -euo pipefail
           ls -lh ./build/*
           RELEASE_TITLE=""
-          while IFS='|' read -r APP_NAME BRAND PATCH_VERSION; do
+          while IFS='|' read -r APP_NAME BRAND PATCH_SOURCE PATCH_VERSION; do
             [ -n "$APP_NAME" ] || continue
             [ -n "$BRAND" ] || BRAND="Morphe"
-            [ -n "$PATCH_VERSION" ] || PATCH_VERSION="latest"
+            PATCH_SOURCE="${PATCH_SOURCE#github:}"
+            PATCH_SOURCE="${PATCH_SOURCE#gitlab:}"
+            PATCH_SOURCE="${PATCH_SOURCE%%,*}"
+            if [ -z "$PATCH_VERSION" ] || [ "$PATCH_VERSION" = "latest" ]; then
+              PATCH_VERSION=$(gh api "repos/$PATCH_SOURCE/releases/latest" --jq '.tag_name' 2>/dev/null || true)
+            elif [ "$PATCH_VERSION" = "dev" ]; then
+              PATCH_VERSION=$(gh api "repos/$PATCH_SOURCE/releases" --jq '.[0].tag_name' 2>/dev/null || true)
+            fi
+            PATCH_VERSION="${PATCH_VERSION#v}"
+            [ -n "$PATCH_VERSION" ] || PATCH_VERSION="unknown"
             APP_TITLE="$APP_NAME ($BRAND $PATCH_VERSION)"
             if [ -n "$RELEASE_TITLE" ]; then
               RELEASE_TITLE="$RELEASE_TITLE x $APP_TITLE"
@@ -105,8 +114,8 @@ jobs:
               v=$0; sub(/^[^"]*"/,"",v); sub(/".*$/,"",v); global_pv=v
             }
             /^\[[^]]+\][[:space:]]*$/ {
-              if (section != "" && enabled == "true" && app != "") print app "|" brand "|" (pv != "" ? pv : global_pv)
-              section=1; enabled=""; app=""; brand=""; pv=""; next
+              if (section != "" && enabled == "true" && app != "") print app "|" brand "|" source "|" (pv != "" ? pv : global_pv)
+              section=1; enabled=""; app=""; brand=""; source=""; pv=""; next
             }
             section && /^[[:space:]]*enabled[[:space:]]*=/ {
               if ($0 ~ /=[[:space:]]*true([[:space:]]*(#.*)?$)/) enabled="true"
@@ -117,11 +126,14 @@ jobs:
             section && /^[[:space:]]*rv-brand[[:space:]]*=/ {
               brand=$0; sub(/^[^"]*"/,"",brand); sub(/".*$/,"",brand)
             }
+            section && /^[[:space:]]*patches-source[[:space:]]*=/ {
+              source=$0; sub(/^[^"]*"/,"",source); sub(/".*$/,"",source)
+            }
             section && /^[[:space:]]*patches-version[[:space:]]*=/ {
               pv=$0; sub(/^[^"]*"/,"",pv); sub(/".*$/,"",pv)
             }
             END {
-              if (section != "" && enabled == "true" && app != "") print app "|" brand "|" (pv != "" ? pv : global_pv)
+              if (section != "" && enabled == "true" && app != "") print app "|" brand "|" source "|" (pv != "" ? pv : global_pv)
             }
           ' config.toml)
           [ -n "$RELEASE_TITLE" ] || RELEASE_TITLE="Morphe build"
