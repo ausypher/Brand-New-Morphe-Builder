@@ -6,7 +6,7 @@ TEMP_DIR="temp"
 BIN_DIR="bin"
 BUILD_DIR="build"
 # Prioritized source list: APKMirror -> Uptodown -> GitHub -> Direct override -> Archive
-DL_SRCS=("uptodown" "apkmirror" "github" "direct" "archive")
+DL_SRCS=("apkmirror" "uptodown" "github" "direct" "archive")
 
 if [ "${GITHUB_TOKEN-}" ]; then GH_HEADER="Authorization: token ${GITHUB_TOKEN}"; else GH_HEADER=; fi
 NEXT_VER_CODE=${NEXT_VER_CODE:-$(date +'%Y%m%d')}
@@ -1552,6 +1552,11 @@ build_rv() {
 	local dl_from=${args[dl_from]:-}
 	local arch=${args[arch]:-}
 	local arch_f="${arch// /}"
+	local source_order=("${DL_SRCS[@]}")
+	# Instagram test: prefer Uptodown, then APKMirror.
+	if [[ "$table" == "Instagram-SysAdminDoc-APK" ]]; then
+		source_order=("uptodown" "apkmirror" "github" "direct" "archive")
+	fi
 
 	local p_patcher_args=()
 	if [[ -n "${args[excluded_patches]:-}" ]]; then p_patcher_args+=("$(join_args "${args[excluded_patches]}" -d)"); fi
@@ -1562,7 +1567,7 @@ build_rv() {
 	if [[ -n "${args[pkg_name]:-}" ]]; then
 		pkg_name="${args[pkg_name]}"
 	else
-		for dl_p in "${DL_SRCS[@]}"; do
+		for dl_p in "${source_order[@]}"; do
 			if [[ -z "${args[${dl_p}_dlurl]:-}" ]]; then continue; fi
 			if ! get_${dl_p}_resp "${args[${dl_p}_dlurl]}" || ! pkg_name=$(get_"${dl_p}"_pkg_name); then
 				args[${dl_p}_dlurl]=""
@@ -1616,7 +1621,7 @@ build_rv() {
 		if [[ "$version_mode" == beta ]]; then __AAV__="true"; else __AAV__="false"; fi
 		
 		# Scan through sources in priority order to securely fetch the latest version
-		for dl_p in "${DL_SRCS[@]}"; do
+		for dl_p in "${source_order[@]}"; do
 			if [[ -n "${args[${dl_p}_dlurl]:-}" ]]; then
 				dl_from=$dl_p
 				
@@ -1673,7 +1678,7 @@ build_rv() {
 	fi
 
 	if [[ -z "$stock_file" ]]; then
-		for dl_p in "${DL_SRCS[@]}"; do
+		for dl_p in "${source_order[@]}"; do
 			if [[ -z "${args[${dl_p}_dlurl]:-}" ]]; then continue; fi
 			pr "Downloading '${table}' from '${dl_p}'"
 			if ! isoneof "$dl_p" "${tried_dl[@]}"; then
