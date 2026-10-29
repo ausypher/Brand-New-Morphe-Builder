@@ -45,27 +45,18 @@ jobs:
             fi
           fi
 
-      - name: Get next version code and date-based release tag
+      - name: Get next APK version code
         id: next_ver_code
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           set -euo pipefail
 
-          # Keep the APK/module versionCode numeric and independent from release tags.
-          LAST_NUMERIC_TAG=$(gh release list --limit 100 --json tagName --jq '[.[].tagName | select(test("^[0-9]+$")) | tonumber] | max // 0')
-          echo "NEXT_VER_CODE=$((LAST_NUMERIC_TAG + 1))" >> "$GITHUB_OUTPUT"
-
-          # Use Ukraine local date. First release of the day has no suffix;
-          # subsequent releases use -1, -2, -3, ...
-          BASE_TAG=$(TZ=Europe/Kyiv date +%d-%m-%Y)
-          if ! gh release view "$BASE_TAG" >/dev/null 2>&1; then
-            RELEASE_TAG="$BASE_TAG"
-          else
-            LAST_SUFFIX=$(gh release list --limit 100 --json tagName | jq -r --arg base "$BASE_TAG" '[.[].tagName | select(test("^" + $base + "-[0-9]+$")) | capture("^" + $base + "-(?<n>[0-9]+)$").n | tonumber] | max // 0')
-            RELEASE_TAG="$BASE_TAG-$((LAST_SUFFIX + 1))"
-          fi
-          echo "RELEASE_TAG=$RELEASE_TAG" >> "$GITHUB_OUTPUT"
+          # Releases are now per-app and no longer use numeric tags.
+          RELEASE_COUNT=$(gh api --paginate "repos/$GITHUB_REPOSITORY/releases?per_page=100" --jq '.[].id' | wc -l)
+          LAST_NUMERIC_TAG=$(gh release list --limit 1000 --json tagName --jq '[.[].tagName | select(test("^[0-9]+$")) | tonumber] | max // 0')
+          CURRENT_MAX=$(( RELEASE_COUNT > LAST_NUMERIC_TAG ? RELEASE_COUNT : LAST_NUMERIC_TAG ))
+          echo "NEXT_VER_CODE=$((CURRENT_MAX + 1))" >> "$GITHUB_OUTPUT"
 
       - name: Start API Solver in background
         run: docker run -d -p 8000:8000 ghcr.io/sarperavci/cloudflarebypassforscraping:latest
@@ -93,74 +84,60 @@ jobs:
           echo "${DELIM}" >> "$GITHUB_OUTPUT"
           cp -f build.md build.tmp
       
-      - name: Upload release
+      - name: Publish individual app releases
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          TAG: ${{ steps.next_ver_code.outputs.RELEASE_TAG }}
-          BODY: ${{ steps.get_output.outputs.BUILD_LOG }}
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           set -euo pipefail
-          ls -lh ./build/*
-          RELEASE_TITLE=""
-          while IFS='|' read -r APP_NAME BRAND PATCH_SOURCE PATCH_VERSION; do
-            [ -n "$APP_NAME" ] || continue
-            [ -n "$BRAND" ] || BRAND="Morphe"
-            PATCH_SOURCE="${PATCH_SOURCE#github:}"
-            PATCH_SOURCE="${PATCH_SOURCE#gitlab:}"
-            PATCH_SOURCE="${PATCH_SOURCE%%,*}"
-            if [ -z "$PATCH_VERSION" ] || [ "$PATCH_VERSION" = "latest" ]; then
-              PATCH_VERSION=$(gh api "repos/$PATCH_SOURCE/releases/latest" --jq '.tag_name' 2>/dev/null || true)
-            elif [ "$PATCH_VERSION" = "dev" ]; then
-              PATCH_VERSION=$(gh api "repos/$PATCH_SOURCE/releases" --jq '.[0].tag_name' 2>/dev/null || true)
-            fi
+          shopt -s nullglob
+          APK_FILES=(./build/*.apk)
+          [ ${#APK_FILES[@]} -gt 0 ] || { echo "No APK files were produced"; exit 1; }
+
+          BASE_TAG=$(TZ=Europe/Kyiv date +%d-%m-%Y)
+          RELEASES_JSON=$(gh release list --limit 1000 --json tagName)
+
+          for APK in "${APK_FILES[@]}"; do
+            FILE=${APK##*/}
+            case "$FILE" in
+              twitter-piko-newx-*.apk)
+                APP_SLUG="twitter"
+                APP_TITLE="Twitter (Piko-NewX)"
+                PATCH_REPO="crimera/piko-newx"
+                ;;
+              instagram-sysadmindoc-*.apk)
+                APP_SLUG="instagram"
+                APP_TITLE="Instagram (SysAdminDoc)"
+                PATCH_REPO="SysAdminDoc/HushGram"
+                ;;
+              *)
+                echo "Skipping APK without a configured per-app release: $FILE"
+                continue
+                ;;
+            esac
+
+            PATCH_VERSION=$(gh api "repos/$PATCH_REPO/releases/latest" --jq '.tag_name' 2>/dev/null || true)
             PATCH_VERSION="${PATCH_VERSION#v}"
             [ -n "$PATCH_VERSION" ] || PATCH_VERSION="unknown"
-            APP_TITLE="$APP_NAME ($BRAND $PATCH_VERSION)"
-            if [ -n "$RELEASE_TITLE" ]; then
-              RELEASE_TITLE="$RELEASE_TITLE x $APP_TITLE"
+            RELEASE_TITLE="$APP_TITLE $PATCH_VERSION"
+
+            BASE_APP_TAG="$BASE_TAG-$APP_SLUG"
+            if ! printf '%s\n' "$RELEASES_JSON" | jq -e --arg tag "$BASE_APP_TAG" '.[] | select(.tagName == $tag)' >/dev/null; then
+              RELEASE_TAG="$BASE_APP_TAG"
             else
-              RELEASE_TITLE="$APP_TITLE"
+              LAST_SUFFIX=$(printf '%s\n' "$RELEASES_JSON" | jq -r --arg base "$BASE_APP_TAG" '
+                [.[] | .tagName | select(test("^" + $base + "-[0-9]+$")) |
+                 capture("^" + $base + "-(?<n>[0-9]+)$").n | tonumber] | max // 0')
+              RELEASE_TAG="$BASE_APP_TAG-$((LAST_SUFFIX + 1))"
             fi
-          done < <(
-            if [ -f config.json ]; then
-              jq -r '
-                . as $root |
-                ($root["patches-version"] // "latest") as $global_pv |
-                to_entries[] |
-                select(.value | type == "object") |
-                select(.value.enabled != false) |
-                [(.value["app-name"] // .key), (.value["rv-brand"] // "Morphe"), (.value["patches-source"] // "github:MorpheApp/morphe-patches"), (.value["patches-version"] // $global_pv)] |
-                @tsv | gsub("\\t"; "|")
-              ' config.json
-            else
-              awk '
-                BEGIN { global_pv="latest" }
-                /^[[:space:]]*patches-version[[:space:]]*=/ && section == "" {
-                  v=$0; sub(/^[^"]*"/,"",v); sub(/".*$/,"",v); global_pv=v
-                }
-                /^\\[[^]]+\\][[:space:]]*$/ {
-                  if (section != "" && enabled == "true" && app != "") print app "|" brand "|" source "|" (pv != "" ? pv : global_pv)
-                  section=1; enabled=""; app=""; brand=""; source=""; pv=""; next
-                }
-                section && /^[[:space:]]*enabled[[:space:]]*=/ {
-                  if ($0 ~ /=[[:space:]]*true([[:space:]]*(#.*)?$)/) enabled="true"
-                }
-                section && /^[[:space:]]*app-name[[:space:]]*=/ { app=$0; sub(/^[^"]*"/,"",app); sub(/".*$/,"",app) }
-                section && /^[[:space:]]*rv-brand[[:space:]]*=/ { brand=$0; sub(/^[^"]*"/,"",brand); sub(/".*$/,"",brand) }
-                section && /^[[:space:]]*patches-source[[:space:]]*=/ { source=$0; sub(/^[^"]*"/,"",source); sub(/".*$/,"",source) }
-                section && /^[[:space:]]*patches-version[[:space:]]*=/ { pv=$0; sub(/^[^"]*"/,"",pv); sub(/".*$/,"",pv) }
-                END { if (section != "" && enabled == "true" && app != "") print app "|" brand "|" source "|" (pv != "" ? pv : global_pv) }
-              ' config.toml
-            fi
-          )
-          [ -n "$RELEASE_TITLE" ] || RELEASE_TITLE="Morphe build"
-          RELEASE_TITLE="$RELEASE_TITLE"
-          if gh release view "$TAG" >/dev/null 2>&1; then
-            gh release edit "$TAG" --title "$RELEASE_TITLE" --notes "$BODY"
-            gh release upload "$TAG" ./build/* --clobber
-          else
-            gh release create "$TAG" ./build/* --title "$RELEASE_TITLE" --notes "$BODY"
-          fi
+
+            NOTES="APK: $FILE
+          App: $APP_TITLE
+          Patch source: https://github.com/$PATCH_REPO/releases/tag/v$PATCH_VERSION"
+
+            echo "Publishing $FILE as $RELEASE_TAG ($RELEASE_TITLE)"
+            gh release create "$RELEASE_TAG" "$APK" --title "$RELEASE_TITLE" --notes "$NOTES"
+          done
       - name: Update modules changelog and update json
         id: update_config
         run: |
