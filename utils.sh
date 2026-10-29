@@ -1331,7 +1331,9 @@ def main():
         btn_variants = soup_ver.select_one(".button.variants")
 
         if btn_variants and (data_version := btn_variants.get("data-version")):
-            base_url = url.rsplit("/", 1)[0]
+            # Uptodown's variants endpoint is rooted at the app page (/android),
+            # not the hostname. Keep the configured app URL as the base.
+            base_url = url.rstrip("/")
             _, r_files = scraper.get_soup(f"{base_url}/app/{data_code}/version/{data_version}/files")
             files_html = ""
             if r_files and r_files.status_code == 200:
@@ -1374,9 +1376,36 @@ def main():
             download_referer = f"{url}/download/{matched_id}-x"
             soup_ver, _ = scraper.get_soup(download_referer)
 
-        dl_btn = soup_ver.select_one("#detail-download-button") if soup_ver else None
-        if not dl_btn or "data-url" not in dl_btn.attrs:
-            log("Uptodown download button missing.")
+        dl_btn = None
+        if soup_ver:
+            # Uptodown has changed button markup over time; prefer the documented
+            # id, then try narrowly-scoped download controls carrying data-url.
+            for selector in (
+                "#detail-download-button",
+                "[id*='detail-download-button'][data-url]",
+                "a.button.download[data-url]",
+                "a[data-url][class*='download']",
+                "button[data-url][class*='download']",
+            ):
+                dl_btn = soup_ver.select_one(selector)
+                if dl_btn and dl_btn.get("data-url"):
+                    break
+                dl_btn = None
+
+        if not dl_btn or not dl_btn.get("data-url"):
+            page_title = soup_ver.title.get_text(" ", strip=True) if soup_ver and soup_ver.title else "no title"
+            status = r.status_code if r else "no response"
+            final_url = r.url if r else download_referer
+            download_controls = []
+            if soup_ver:
+                for node in soup_ver.select("[data-url]")[:8]:
+                    download_controls.append(
+                        f"{node.name}#{node.get('id', '')}.{'.'.join(node.get('class', []))}"
+                    )
+            log(
+                f"Uptodown download button missing. HTTP={status}; URL={final_url}; "
+                f"title={page_title}; data-url controls={download_controls or 'none'}"
+            )
             sys.exit(1)
             
         dl_url = dl_btn["data-url"]
