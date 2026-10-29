@@ -121,34 +121,38 @@ jobs:
             else
               RELEASE_TITLE="$APP_TITLE"
             fi
-          done < <(awk '
-            BEGIN { global_pv="latest" }
-            /^[[:space:]]*patches-version[[:space:]]*=/ && section == "" {
-              v=$0; sub(/^[^"]*"/,"",v); sub(/".*$/,"",v); global_pv=v
-            }
-            /^\[[^]]+\][[:space:]]*$/ {
-              if (section != "" && enabled == "true" && app != "") print app "|" brand "|" source "|" (pv != "" ? pv : global_pv)
-              section=1; enabled=""; app=""; brand=""; source=""; pv=""; next
-            }
-            section && /^[[:space:]]*enabled[[:space:]]*=/ {
-              if ($0 ~ /=[[:space:]]*true([[:space:]]*(#.*)?$)/) enabled="true"
-            }
-            section && /^[[:space:]]*app-name[[:space:]]*=/ {
-              app=$0; sub(/^[^"]*"/,"",app); sub(/".*$/,"",app)
-            }
-            section && /^[[:space:]]*rv-brand[[:space:]]*=/ {
-              brand=$0; sub(/^[^"]*"/,"",brand); sub(/".*$/,"",brand)
-            }
-            section && /^[[:space:]]*patches-source[[:space:]]*=/ {
-              source=$0; sub(/^[^"]*"/,"",source); sub(/".*$/,"",source)
-            }
-            section && /^[[:space:]]*patches-version[[:space:]]*=/ {
-              pv=$0; sub(/^[^"]*"/,"",pv); sub(/".*$/,"",pv)
-            }
-            END {
-              if (section != "" && enabled == "true" && app != "") print app "|" brand "|" source "|" (pv != "" ? pv : global_pv)
-            }
-          ' config.toml)
+          done < <(
+            if [ -f config.json ]; then
+              jq -r '
+                . as $root |
+                ($root["patches-version"] // "latest") as $global_pv |
+                to_entries[] |
+                select(.value | type == "object") |
+                select(.value.enabled != false) |
+                [(.value["app-name"] // .key), (.value["rv-brand"] // "Morphe"), (.value["patches-source"] // "github:MorpheApp/morphe-patches"), (.value["patches-version"] // $global_pv)] |
+                @tsv | gsub("\\t"; "|")
+              ' config.json
+            else
+              awk '
+                BEGIN { global_pv="latest" }
+                /^[[:space:]]*patches-version[[:space:]]*=/ && section == "" {
+                  v=$0; sub(/^[^"]*"/,"",v); sub(/".*$/,"",v); global_pv=v
+                }
+                /^\\[[^]]+\\][[:space:]]*$/ {
+                  if (section != "" && enabled == "true" && app != "") print app "|" brand "|" source "|" (pv != "" ? pv : global_pv)
+                  section=1; enabled=""; app=""; brand=""; source=""; pv=""; next
+                }
+                section && /^[[:space:]]*enabled[[:space:]]*=/ {
+                  if ($0 ~ /=[[:space:]]*true([[:space:]]*(#.*)?$)/) enabled="true"
+                }
+                section && /^[[:space:]]*app-name[[:space:]]*=/ { app=$0; sub(/^[^"]*"/,"",app); sub(/".*$/,"",app) }
+                section && /^[[:space:]]*rv-brand[[:space:]]*=/ { brand=$0; sub(/^[^"]*"/,"",brand); sub(/".*$/,"",brand) }
+                section && /^[[:space:]]*patches-source[[:space:]]*=/ { source=$0; sub(/^[^"]*"/,"",source); sub(/".*$/,"",source) }
+                section && /^[[:space:]]*patches-version[[:space:]]*=/ { pv=$0; sub(/^[^"]*"/,"",pv); sub(/".*$/,"",pv) }
+                END { if (section != "" && enabled == "true" && app != "") print app "|" brand "|" source "|" (pv != "" ? pv : global_pv) }
+              ' config.toml
+            fi
+          )
           [ -n "$RELEASE_TITLE" ] || RELEASE_TITLE="Morphe build"
           RELEASE_TITLE="$RELEASE_TITLE"
           if gh release view "$TAG" >/dev/null 2>&1; then
