@@ -45,14 +45,27 @@ jobs:
             fi
           fi
 
-      - name: Get next version code
+      - name: Get next version code and date-based release tag
         id: next_ver_code
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          TAG=$(gh release list -L 1 | awk -F '\t' '{print $3}')
-          if [ -z "$TAG" ]; then TAG=0; fi
-          echo "NEXT_VER_CODE=$((TAG + 1))" >> $GITHUB_OUTPUT
+          set -euo pipefail
+
+          # Keep the APK/module versionCode numeric and independent from release tags.
+          LAST_NUMERIC_TAG=$(gh release list --limit 100 --json tagName --jq '[.[].tagName | select(test("^[0-9]+$")) | tonumber] | max // 0')
+          echo "NEXT_VER_CODE=$((LAST_NUMERIC_TAG + 1))" >> "$GITHUB_OUTPUT"
+
+          # Use Ukraine local date. First release of the day has no suffix;
+          # subsequent releases use -1, -2, -3, ...
+          BASE_TAG=$(TZ=Europe/Kyiv date +%d-%m-%Y)
+          if ! gh release view "$BASE_TAG" >/dev/null 2>&1; then
+            RELEASE_TAG="$BASE_TAG"
+          else
+            LAST_SUFFIX=$(gh release list --limit 100 --json tagName --jq --arg base "$BASE_TAG" '[.[].tagName | select(test("^" + $base + "-[0-9]+$")) | capture("^" + $base + "-(?<n>[0-9]+)$").n | tonumber] | max // 0')
+            RELEASE_TAG="$BASE_TAG-$((LAST_SUFFIX + 1))"
+          fi
+          echo "RELEASE_TAG=$RELEASE_TAG" >> "$GITHUB_OUTPUT"
 
       - name: Start API Solver in background
         run: docker run -d -p 8000:8000 ghcr.io/sarperavci/cloudflarebypassforscraping:latest
@@ -83,7 +96,7 @@ jobs:
       - name: Upload release
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          TAG: ${{ steps.next_ver_code.outputs.NEXT_VER_CODE }}
+          TAG: ${{ steps.next_ver_code.outputs.RELEASE_TAG }}
           BODY: ${{ steps.get_output.outputs.BUILD_LOG }}
         run: |
           set -euo pipefail
@@ -137,7 +150,7 @@ jobs:
             }
           ' config.toml)
           [ -n "$RELEASE_TITLE" ] || RELEASE_TITLE="Morphe build"
-          RELEASE_TITLE="$RELEASE_TITLE (R$TAG)"
+          RELEASE_TITLE="$RELEASE_TITLE"
           if gh release view "$TAG" >/dev/null 2>&1; then
             gh release edit "$TAG" --title "$RELEASE_TITLE" --notes "$BODY"
             gh release upload "$TAG" ./build/* --clobber
@@ -166,7 +179,7 @@ jobs:
             UPDATE_JSON="${UPDATE_JSON##*/}"
             VER=$(echo "$ZIP_S" | grep version=)
             VER="${VER##*=}"
-            DLURL="$GITHUB_SERVER_URL/$GITHUB_REPOSITORY/releases/download/${{ steps.next_ver_code.outputs.NEXT_VER_CODE }}/${OUTPUT}"
+            DLURL="$GITHUB_SERVER_URL/$GITHUB_REPOSITORY/releases/download/${{ steps.next_ver_code.outputs.RELEASE_TAG }}/${OUTPUT}"
             get_update_json "$VER" "$DLURL" >"../$UPDATE_JSON"
           done
           cd ..
