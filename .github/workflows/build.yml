@@ -58,11 +58,12 @@ jobs:
 
           # Use Ukraine local date. First release of the day has no suffix;
           # subsequent releases use -1, -2, -3, ...
-          BASE_TAG=$(TZ=Europe/Kyiv date +%d-%m-%Y)
+          BASE_TAG=$(TZ=Europe/Kyiv date +%Y-%m-%d)
           if ! gh release view "$BASE_TAG" >/dev/null 2>&1; then
             RELEASE_TAG="$BASE_TAG"
           else
-            LAST_SUFFIX=$(gh release list --limit 100 --json tagName --jq --arg base "$BASE_TAG" '[.[].tagName | select(test("^" + $base + "-[0-9]+$")) | capture("^" + $base + "-(?<n>[0-9]+)$").n | tonumber] | max // 0')
+            LAST_SUFFIX=$(gh release list --limit 100 --json tagName --jq ".[].tagName | select(test(\"^${BASE_TAG}-[0-9]+$\")) | sub(\"^${BASE_TAG}-\"; \"\") | tonumber" | sort -n | tail -n 1 || true)
+            LAST_SUFFIX="${LAST_SUFFIX:-0}"
             RELEASE_TAG="$BASE_TAG-$((LAST_SUFFIX + 1))"
           fi
           echo "RELEASE_TAG=$RELEASE_TAG" >> "$GITHUB_OUTPUT"
