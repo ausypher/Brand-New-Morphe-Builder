@@ -5,8 +5,8 @@ CWD=$(pwd)
 TEMP_DIR="temp"
 BIN_DIR="bin"
 BUILD_DIR="build"
-# Only enabled APK source: Uptodown
-DL_SRCS=("uptodown")
+# Prioritized source list: APKMirror -> Uptodown -> GitHub -> Direct override -> Archive
+DL_SRCS=("apkmirror" "uptodown" "github" "direct" "archive")
 
 if [ "${GITHUB_TOKEN-}" ]; then GH_HEADER="Authorization: token ${GITHUB_TOKEN}"; else GH_HEADER=; fi
 NEXT_VER_CODE=${NEXT_VER_CODE:-$(date +'%Y%m%d')}
@@ -1326,91 +1326,55 @@ def main():
         ver_url = f"{ver_url_data.get('url', '')}/{ver_url_data.get('extraURL', '')}/{ver_url_data.get('versionID', '')}"
         soup_ver, _ = scraper.get_soup(ver_url)
         if not soup_ver: sys.exit(1)
-        download_referer = ver_url
         
         btn_variants = soup_ver.select_one(".button.variants")
 
         if btn_variants and (data_version := btn_variants.get("data-version")):
-            # Uptodown's variants endpoint is rooted at the app page (/android),
-            # not the hostname. Keep the configured app URL as the base.
-            base_url = url.rstrip("/")
+            base_url = url.rsplit("/", 1)[0]
             _, r_files = scraper.get_soup(f"{base_url}/app/{data_code}/version/{data_version}/files")
-            files_html = ""
-            if r_files and r_files.status_code == 200:
-                try:
-                    files_html = json.loads(r_files.text).get("content", "")
-                except (ValueError, TypeError) as e:
-                    log(f"Could not parse Uptodown APK variants response: {e}")
-
+            files_html = json.loads(r_files.text).get("content", "") if r_files else ""
             soup_files = BeautifulSoup(files_html, 'html.parser')
             content = soup_files.select_one(".content")
-
+            
             matched_id = None
-            available_arches = []
+            first_id = None
+            first_is_bundle = False
             if content:
-                node_arch = ""
                 for child in content.children:
-                    if not getattr(child, "name", None):
-                        continue
+                    if not getattr(child, "name", None): continue
                     if "variant" not in child.get("class", []):
-                        node_arch = child.get_text(" ", strip=True)
+                        node_arch = child.get_text(strip=True)
                         continue
-
+                    
                     file_type_tag = child.select_one(".v-file > span")
                     cur_bundle = file_type_tag.get_text(strip=True).lower() == "xapk" if file_type_tag else False
                     v_rep = child.select_one(".v-report")
                     cur_id = v_rep["data-file-id"] if v_rep and "data-file-id" in v_rep.attrs else None
-                    if not cur_id:
-                        continue
+                    if not cur_id: continue
 
-                    available_arches.append(node_arch or "unknown")
+                    if first_id is None:
+                        first_id = cur_id
+                        first_is_bundle = cur_bundle
+
                     if is_arch_compat(node_arch, arch):
                         matched_id = cur_id
                         is_bundle = cur_bundle
                         break
 
-            if not matched_id:
-                log(f"No Uptodown variant compatible with requested architecture '{arch}'. Available variants: {', '.join(available_arches) or 'none parsed'}")
-                sys.exit(1)
+            if not matched_id and first_id:
+                matched_id = first_id
+                is_bundle = first_is_bundle
 
-            download_referer = f"{url}/download/{matched_id}-x"
-            soup_ver, _ = scraper.get_soup(download_referer)
+            if matched_id:
+                soup_ver, _ = scraper.get_soup(f"{url}/download/{matched_id}-x")
 
-        dl_btn = None
-        if soup_ver:
-            # Uptodown has changed button markup over time; prefer the documented
-            # id, then try narrowly-scoped download controls carrying data-url.
-            for selector in (
-                "#detail-download-button",
-                "[id*='detail-download-button'][data-url]",
-                "a.button.download[data-url]",
-                "a[data-url][class*='download']",
-                "button[data-url][class*='download']",
-            ):
-                dl_btn = soup_ver.select_one(selector)
-                if dl_btn and dl_btn.get("data-url"):
-                    break
-                dl_btn = None
-
-        if not dl_btn or not dl_btn.get("data-url"):
-            page_title = soup_ver.title.get_text(" ", strip=True) if soup_ver and soup_ver.title else "no title"
-            status = r.status_code if r else "no response"
-            final_url = r.url if r else download_referer
-            download_controls = []
-            if soup_ver:
-                for node in soup_ver.select("[data-url]")[:8]:
-                    download_controls.append(
-                        f"{node.name}#{node.get('id', '')}.{'.'.join(node.get('class', []))}"
-                    )
-            log(
-                f"Uptodown download button missing. HTTP={status}; URL={final_url}; "
-                f"title={page_title}; data-url controls={download_controls or 'none'}"
-            )
+        dl_btn = soup_ver.select_one("#detail-download-button") if soup_ver else None
+        if not dl_btn or "data-url" not in dl_btn.attrs:
+            log("Uptodown download button missing.")
             sys.exit(1)
             
         dl_url = dl_btn["data-url"]
-        download_url = urljoin("https://dw.uptodown.com/dwn/", dl_url)
-        scraper.download(download_url, dest_path, is_bundle, download_referer)
+        scraper.download(f"https://dw.uptodown.com/dwn/{dl_url}", dest_path, is_bundle, None)
 
 if __name__ == "__main__":
     main()
