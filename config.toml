@@ -441,10 +441,6 @@ build-mode = "apk" # Options 'apk', 'module', or 'both'
 version = "auto"
 include-stock = "split" # Options 'split', 'merged', or 'disable'
 # patches-version = "dev" # Options 'latest', 'dev', or A specific version tag
-included-patches = """\
-    'NewX: Restore Twitter branding' \
-    'NewX: Browse tweet object' \
-    """
 apkmirror-dlurl = "https://www.apkmirror.com/apk/x-corp/twitter"
 uptodown-dlurl = "https://twitter.en.uptodown.com/android"
 github-dlurl = "https://github.com/dj-tanjid/AppRepo/releases/tag/com.twitter.android"
@@ -505,24 +501,6 @@ version = "auto" # 'auto', 'experimental', 'latest' or a version number
 arch = "arm64-v8a" # Options 'arm64-v8a', 'armeabi-v7a', 'x86', 'x86_64', or 'universal'
 include-stock = "split" # Options 'split', 'merged', or 'disable'
 patches-version = "dev" # Options 'latest', 'dev', or A specific version tag
-included-patches = """\
-    'Open developer options' \
-    'Remove the empty space at the bottom' \
-    'Pure black dark mode' \
-    'Story ring size' \
-    'Start Home on Following' \
-    'Default playback quality' \
-    'Download any video' \
-    'Copy comment' \
-    'Show a story's exact time' \
-    'Save comment photo' \
-    'Keep a seek bar on Reels' \
-    'Read messages without the seen receipt' \
-    'Hide that you're typing' \
-    'Show a post's exact time' \
-    'See who a story mentions' \
-    'View DM photos and videos anonymously' \
-    """
 apkmirror-dlurl = "https://www.apkmirror.com/apk/instagram/instagram-instagram"
 uptodown-dlurl = "https://instagram.en.uptodown.com/android"
 # github-dlurl = "https://github.com/krvstek/uni-storage/releases/tag/instagram"
