@@ -146,6 +146,9 @@ get_prebuilts() {
 				matches=$(jq -e '.assets | map(select(.name | (endswith("asc") or endswith("json")) | not))' <<<"$resp") || return 1
 			fi
 
+			# Patch bundles must be .mpp files; ignore checksum and other release assets.
+			matches=$(jq -e 'map(select(.name | endswith(".mpp")))' <<<"$matches") || return 1
+
 			if [[ "$(jq 'length' <<<"$matches")" -gt 1 ]]; then
 				local matches_new
 				matches_new=$(jq -e -r 'map(select(.name | contains("-dev") | not))' <<<"$matches" 2>/dev/null)
