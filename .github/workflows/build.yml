@@ -89,11 +89,7 @@ jobs:
           set -euo pipefail
           ls -lh ./build/*
           RELEASE_TITLE=""
-          while IFS= read -r SECTION; do
-            [ -z "$SECTION" ] && continue
-            APP_NAME=$(sed -n '/^app-name[[:space:]]*=/s/^[^"]*"\(.*\)".*/\1/p' <<< "$SECTION" | head -n1)
-            BRAND=$(sed -n '/^rv-brand[[:space:]]*=/s/^[^"]*"\(.*\)".*/\1/p' <<< "$SECTION" | head -n1)
-            PATCH_VERSION=$(sed -n '/^patches-version[[:space:]]*=/s/^[^"]*"\(.*\)".*/\1/p' <<< "$SECTION" | head -n1)
+          while IFS='|' read -r APP_NAME BRAND PATCH_VERSION; do
             [ -n "$APP_NAME" ] || continue
             [ -n "$BRAND" ] || BRAND="Morphe"
             [ -n "$PATCH_VERSION" ] || PATCH_VERSION="latest"
@@ -104,13 +100,30 @@ jobs:
               RELEASE_TITLE="$APP_TITLE"
             fi
           done < <(awk '
-            /^\[[^]]+\][[:space:]]*$/ {
-              if (section != "" && enabled == "true") print section
-              section=$0 "\n"; enabled=""; next
+            BEGIN { global_pv="latest" }
+            /^[[:space:]]*patches-version[[:space:]]*=/ && section == "" {
+              v=$0; sub(/^[^"]*"/,"",v); sub(/".*$/,"",v); global_pv=v
             }
-            { section=section $0 "\n"; if ($0 ~ /^enabled[[:space:]]*=[[:space:]]*true([[:space:]]|$)/) enabled="true" }
-            END { if (section != "" && enabled == "true") print section }
-          ' config.toml | awk 'BEGIN { RS="\n\n" } { gsub(/\n/, "\n"); print }')
+            /^\[[^]]+\][[:space:]]*$/ {
+              if (section != "" && enabled == "true" && app != "") print app "|" brand "|" (pv != "" ? pv : global_pv)
+              section=1; enabled=""; app=""; brand=""; pv=""; next
+            }
+            section && /^[[:space:]]*enabled[[:space:]]*=/ {
+              if ($0 ~ /=[[:space:]]*true([[:space:]]*(#.*)?$)/) enabled="true"
+            }
+            section && /^[[:space:]]*app-name[[:space:]]*=/ {
+              app=$0; sub(/^[^"]*"/,"",app); sub(/".*$/,"",app)
+            }
+            section && /^[[:space:]]*rv-brand[[:space:]]*=/ {
+              brand=$0; sub(/^[^"]*"/,"",brand); sub(/".*$/,"",brand)
+            }
+            section && /^[[:space:]]*patches-version[[:space:]]*=/ {
+              pv=$0; sub(/^[^"]*"/,"",pv); sub(/".*$/,"",pv)
+            }
+            END {
+              if (section != "" && enabled == "true" && app != "") print app "|" brand "|" (pv != "" ? pv : global_pv)
+            }
+          ' config.toml)
           [ -n "$RELEASE_TITLE" ] || RELEASE_TITLE="Morphe build"
           RELEASE_TITLE="$RELEASE_TITLE (R$TAG)"
           if gh release view "$TAG" >/dev/null 2>&1; then
@@ -119,7 +132,6 @@ jobs:
           else
             gh release create "$TAG" ./build/* --title "$RELEASE_TITLE" --notes "$BODY"
           fi
-
       - name: Update modules changelog and update json
         id: update_config
         run: |
