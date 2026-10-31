@@ -107,8 +107,13 @@ jobs:
                 ;;
               instagram-sysadmindoc-*.apk)
                 APP_SLUG="instagram"
-                APP_TITLE="Instagram (SysAdminDoc)"
+                APP_TITLE="HushGram"
                 PATCH_REPO="SysAdminDoc/HushGram"
+                ;;
+              instagram-piko-*.apk)
+                APP_SLUG="instagram-piko"
+                APP_TITLE="InstaPiko"
+                PATCH_REPO="crimera/piko"
                 ;;
               *)
                 echo "Skipping APK without a configured per-app release: $FILE"
