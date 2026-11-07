@@ -426,7 +426,7 @@ config_update() {
 						last_patches="${name_only}-${tag_name#v}.${name_ext}"
 					fi
 
-					if ! OP=$(grep -F -m1 "${org}/${last_patches}" build.md 2>/dev/null); then
+					if ! OP=$(grep -m1 "^Patches: ${org}/${last_patches}" build.md 2>/dev/null); then
 						sources["$raw_src/$p_ver"]=1
 						prcfg=true
 						upped+=("$table_name")
@@ -647,7 +647,7 @@ patch_apk() {
 	done
 
 	local cmd="java -jar '$cli_jar' patch '$stock_input' -o '$patched_apk' "${p_flags[@]}" --keystore=Morphe.keystore \
-    --keystore-entry-password=Morphe --keystore-password= --signer=Morphe --keystore-entry-alias=Morphe -t '$patched_apk-tmp' $patcher_args"
+    --keystore-entry-password=Morphe --keystore-password= --signer=Morphe --keystore-entry-alias=Morphe -t '${patched_apk}-tmp' $patcher_args"
 
 	local cli_name
 	cli_name=$(basename "$cli_jar")
@@ -678,7 +678,7 @@ setup_python_backend() {
 	mkdir -p "$TEMP_DIR"
 	if [ ! -f "$TEMP_DIR/network_engine.py" ]; then
 		export PIP_BREAK_SYSTEM_PACKAGES=1
-		python3 -m pip install -q "curl_cffi>=0.16.3" "beautifulsoup4>=4.15.0" "urllib3>=2.8.0" requests 2>/dev/null || true
+		python3 -m pip install -q "curl_cffi>=0.17.0" "beautifulsoup4>=4.15.0" "urllib3>=2.8.0" requests 2>/dev/null || true
 		cat << 'EOF' > "$TEMP_DIR/network_engine.py"
 import sys, os, re, time, json, random
 from urllib.parse import urljoin
