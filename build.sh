@@ -60,6 +60,7 @@ if ((COMPRESSION_LEVEL > 9)) || ((COMPRESSION_LEVEL < 0)); then abort "compressi
 
 rm -rf module/bin/*/tmp.*
 rm -f "${TEMP_DIR}/patches_changelog.md" "${TEMP_DIR}/cli_changelog.md"
+: >"${TEMP_DIR}/patches_changelog.md"
 
 mkdir -p ${MODULE_TEMPLATE_DIR}/bin/arm64 ${MODULE_TEMPLATE_DIR}/bin/arm ${MODULE_TEMPLATE_DIR}/bin/x86 ${MODULE_TEMPLATE_DIR}/bin/x64
 gh_dl "${MODULE_TEMPLATE_DIR}/bin/arm64/cmpr" "https://github.com/j-hc/cmpr/releases/latest/download/cmpr-arm64-v8a"
@@ -88,7 +89,8 @@ for table_name in $(toml_get_table_names); do
 	cli_ver=$(toml_get "$t" cli-version) || cli_ver=$DEF_CLI_VER
 
 	# Only persist this app's patch changelog if its build succeeds.
-	patch_log_before=$(wc -l < "$TEMP_DIR/patches_changelog.md" 2>/dev/null || echo 0)
+	patch_log_before=$(wc -l < "$TEMP_DIR/patches_changelog.md")
+	build_md_before=$(wc -l < build.md 2>/dev/null || echo 0)
 	if ! PREBUILTS="$(get_prebuilts "$cli_src" "$cli_ver" "$patches_src" "$patches_ver")"; then
 		epr "Could not get prebuilts for '$table_name'; skipping this app."
 		head -n "$patch_log_before" "$TEMP_DIR/patches_changelog.md" > "$TEMP_DIR/patches_changelog.tmp" || :
@@ -171,6 +173,8 @@ for table_name in $(toml_get_table_names); do
 			epr "Build failed for '$table_name' (arm64-v8a); skipping this app."
 			head -n "$patch_log_before" "$TEMP_DIR/patches_changelog.md" > "$TEMP_DIR/patches_changelog.tmp" || :
 			mv -f "$TEMP_DIR/patches_changelog.tmp" "$TEMP_DIR/patches_changelog.md"
+			head -n "$build_md_before" build.md > build.md.tmp || :
+			mv -f build.md.tmp build.md
 			continue
 		fi
 		
@@ -183,6 +187,8 @@ for table_name in $(toml_get_table_names); do
 			epr "Build failed for '$table_name' (arm-v7a); skipping this app."
 			head -n "$patch_log_before" "$TEMP_DIR/patches_changelog.md" > "$TEMP_DIR/patches_changelog.tmp" || :
 			mv -f "$TEMP_DIR/patches_changelog.tmp" "$TEMP_DIR/patches_changelog.md"
+			head -n "$build_md_before" build.md > build.md.tmp || :
+			mv -f build.md.tmp build.md
 			continue
 		fi
 	else
@@ -197,6 +203,8 @@ for table_name in $(toml_get_table_names); do
 			epr "Build failed for '$table_name'; skipping this app."
 			head -n "$patch_log_before" "$TEMP_DIR/patches_changelog.md" > "$TEMP_DIR/patches_changelog.tmp" || :
 			mv -f "$TEMP_DIR/patches_changelog.tmp" "$TEMP_DIR/patches_changelog.md"
+			head -n "$build_md_before" build.md > build.md.tmp || :
+			mv -f build.md.tmp build.md
 			continue
 		fi
 	fi
