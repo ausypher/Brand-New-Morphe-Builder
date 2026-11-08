@@ -28,17 +28,31 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          if ! git checkout origin/update build.md; then
-            echo "first time building!"
-            echo "SHOULD_BUILD=1" >> $GITHUB_OUTPUT
+          # A manual run is an explicit request to rebuild every enabled app.
+          if [[ "$GITHUB_EVENT_NAME" == "workflow_dispatch" ]]; then
+            echo "Manual run: forcing a full build."
+            echo "SHOULD_BUILD=1" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+
+          if ! git checkout origin/update -- build.md; then
+            echo "No previous build record; starting the first build."
+            echo "SHOULD_BUILD=1" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+
+          if ! UPDATE_CFG=$(./build.sh config.toml --config-update); then
+            echo "::error::Could not check patch updates."
+            exit 1
+          fi
+
+          if [[ -n "$UPDATE_CFG" ]]; then
+            echo "New patch version detected; building affected apps."
+            printf '%s\\n' "$UPDATE_CFG" > config.json
+            echo "SHOULD_BUILD=1" >> "$GITHUB_OUTPUT"
           else
-            UPDATE_CFG=$(./build.sh config.toml --config-update)
-            if [ "$UPDATE_CFG" ]; then
-              echo "'$UPDATE_CFG'"
-              echo "SHOULD_BUILD=1" >> $GITHUB_OUTPUT
-            else
-              echo "SHOULD_BUILD=0" >> $GITHUB_OUTPUT
-            fi
+            echo "No patch changes; skipping automatic build."
+            echo "SHOULD_BUILD=0" >> "$GITHUB_OUTPUT"
           fi
 
       - name: Clear older runs
@@ -55,4 +69,8 @@ jobs:
     needs: check
     uses: ./.github/workflows/build.yml
     if: ${{ needs.check.outputs.SHOULD_BUILD == 1 }}
+    with:
+      # Automatic runs build only apps affected by a new patch.
+      # Manual runs bypass the patch filter and rebuild all enabled apps.
+      from_ci: ${{ github.event_name != 'workflow_dispatch' }}
     secrets: inherit
