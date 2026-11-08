@@ -28,12 +28,7 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          # A manual run is an explicit request to rebuild every enabled app.
-          if [[ "$GITHUB_EVENT_NAME" == "workflow_dispatch" ]]; then
-            echo "Manual run: forcing a full build."
-            echo "SHOULD_BUILD=1" >> "$GITHUB_OUTPUT"
-            exit 0
-          fi
+          # CI always checks patch-source versions, regardless of how it was started.
 
           if ! git checkout origin/update -- build.md; then
             echo "No previous build record; starting the first build."
@@ -72,5 +67,5 @@ jobs:
     with:
       # Automatic runs build only apps affected by a new patch.
       # Manual runs bypass the patch filter and rebuild all enabled apps.
-      from_ci: ${{ github.event_name != 'workflow_dispatch' }}
+      from_ci: true
     secrets: inherit
