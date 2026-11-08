@@ -1805,7 +1805,7 @@ build_rv() {
 		if [[ "${NORB:-}" != true || ( ! -f "$patched_apk" && ! -f "$apk_output" ) ]]; then
 			if ! patch_apk "$patch_input" "$patched_apk" "${patcher_args[*]}" "${args[cli]}" "${args[ptjar]}"; then
 				epr "Building '${table}' failed!"
-				return 0
+				return 1
 			fi
 		fi
 
