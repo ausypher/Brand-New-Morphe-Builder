@@ -10,7 +10,7 @@ on:
       from_ci:
         type: boolean
         required: false
-        default: true
+        default: false
 
   workflow_dispatch:
 
