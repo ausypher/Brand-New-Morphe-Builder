@@ -48,7 +48,7 @@ jobs:
 
           if [[ -n "$UPDATE_CFG" ]]; then
             echo "New patch version detected; building affected apps."
-            printf '%s\\n' "$UPDATE_CFG" > config.json
+            printf '%s\n' "$UPDATE_CFG" > config.json
             echo "SHOULD_BUILD=1" >> "$GITHUB_OUTPUT"
           else
             echo "No patch changes; skipping automatic build."
