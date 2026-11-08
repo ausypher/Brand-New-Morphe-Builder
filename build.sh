@@ -87,8 +87,12 @@ for table_name in $(toml_get_table_names); do
 	cli_src=$(toml_get "$t" cli-source) || cli_src=$DEF_CLI_SRC
 	cli_ver=$(toml_get "$t" cli-version) || cli_ver=$DEF_CLI_VER
 
+	# Only persist this app's patch changelog if its build succeeds.
+	patch_log_before=$(wc -l < "$TEMP_DIR/patches_changelog.md" 2>/dev/null || echo 0)
 	if ! PREBUILTS="$(get_prebuilts "$cli_src" "$cli_ver" "$patches_src" "$patches_ver")"; then
-		epr "Could not get prebuilts"
+		epr "Could not get prebuilts for '$table_name'; skipping this app."
+		head -n "$patch_log_before" "$TEMP_DIR/patches_changelog.md" > "$TEMP_DIR/patches_changelog.tmp" || :
+		mv -f "$TEMP_DIR/patches_changelog.tmp" "$TEMP_DIR/patches_changelog.md"
 		continue
 	fi
 
@@ -163,14 +167,24 @@ for table_name in $(toml_get_table_names); do
 		app_args[module_prop_name]="${module_prop_name_b}-arm64"
 		
 		print_banner "${app_args[table]} (arm64-v8a)"
-		build_rv "$(declare -p app_args)"
+		if ! build_rv "$(declare -p app_args)"; then
+			epr "Build failed for '$table_name' (arm64-v8a); skipping this app."
+			head -n "$patch_log_before" "$TEMP_DIR/patches_changelog.md" > "$TEMP_DIR/patches_changelog.tmp" || :
+			mv -f "$TEMP_DIR/patches_changelog.tmp" "$TEMP_DIR/patches_changelog.md"
+			continue
+		fi
 		
 		app_args[table]="$table_name"
 		app_args[arch]="arm-v7a"
 		app_args[module_prop_name]="${module_prop_name_b}-arm"
 		
 		print_banner "${app_args[table]} (arm-v7a)"
-		build_rv "$(declare -p app_args)"
+		if ! build_rv "$(declare -p app_args)"; then
+			epr "Build failed for '$table_name' (arm-v7a); skipping this app."
+			head -n "$patch_log_before" "$TEMP_DIR/patches_changelog.md" > "$TEMP_DIR/patches_changelog.tmp" || :
+			mv -f "$TEMP_DIR/patches_changelog.tmp" "$TEMP_DIR/patches_changelog.md"
+			continue
+		fi
 	else
 		if [ "${app_args[arch]}" = "arm64-v8a" ]; then
 			app_args[module_prop_name]="${app_args[module_prop_name]}-arm64"
@@ -179,7 +193,12 @@ for table_name in $(toml_get_table_names); do
 		fi
 		
 		print_banner "${app_args[table]}"
-		build_rv "$(declare -p app_args)"
+		if ! build_rv "$(declare -p app_args)"; then
+			epr "Build failed for '$table_name'; skipping this app."
+			head -n "$patch_log_before" "$TEMP_DIR/patches_changelog.md" > "$TEMP_DIR/patches_changelog.tmp" || :
+			mv -f "$TEMP_DIR/patches_changelog.tmp" "$TEMP_DIR/patches_changelog.md"
+			continue
+		fi
 	fi
 done
 
