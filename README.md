@@ -2,139 +2,155 @@
 
 # ⚡ Brand New Morphe Builder
 
-<p align="center">
-  <b>This repository is a fork based on</b><br>
-  <a href="https://github.com/dj-tanjid/Brand-New-Morphe-Builder">dj-tanjid/Brand-New-Morphe-Builder</a> and
-  <a href="https://github.com/j-hc/revanced-magisk-module">j-hc/revanced-magisk-module</a>.
+### A unified automation hub for patched Android apps
+
+Build ready-to-install **APK packages** and **root modules** with GitHub Actions.
+
+<p>
+  <a href="https://github.com/ausypher/Brand-New-Morphe-Builder/actions/workflows/build.yml"><img src="https://img.shields.io/github/actions/workflow/status/ausypher/Brand-New-Morphe-Builder/build.yml?style=for-the-badge&logo=githubactions&logoColor=white&label=Build" alt="Build status"></a>
+  <a href="https://github.com/ausypher/Brand-New-Morphe-Builder/releases"><img src="https://img.shields.io/github/v/release/ausypher/Brand-New-Morphe-Builder?style=for-the-badge&logo=android&label=Latest%20release" alt="Latest release"></a>
+  <a href="https://github.com/ausypher/Brand-New-Morphe-Builder/blob/main/LICENSE"><img src="https://img.shields.io/github/license/ausypher/Brand-New-Morphe-Builder?style=for-the-badge&label=License" alt="License"></a>
+  <a href="https://github.com/ausypher/Brand-New-Morphe-Builder/stargazers"><img src="https://img.shields.io/github/stars/ausypher/Brand-New-Morphe-Builder?style=for-the-badge&label=Stars" alt="Stars"></a>
 </p>
 
-<p align="center">
-  <b>Automated, high-performance CI/CD pipeline for building root Magisk/KernelSU modules and non-root APKs.</b><br>
-  Powered by <a href="https://github.com/MorpheApp">Morphe</a>, <a href="https://github.com/crimera/piko">Piko</a>, <a href="https://github.com/SysAdminDoc">SysAdminDoc</a>, <a href="https://github.com/VenusIsJaded/Venus-Patches">Venus</a>, and many more.
-</p>
+**Fork origins**
 
-[![Build Workflow](https://img.shields.io/github/actions/workflow/status/ausypher/Brand-New-Morphe-Builder/build.yml?label=Build%20Status&logo=githubactions&logoColor=white)](../../actions/workflows/build.yml)
-[![GitHub License](https://img.shields.io/github/license/ausypher/Brand-New-Morphe-Builder?logo=github&label=License&color=blue)](https://github.com/ausypher/Brand-New-Morphe-Builder/blob/main/LICENSE)
-[![Latest Release](https://img.shields.io/github/v/release/ausypher/Brand-New-Morphe-Builder?label=Latest%20Release&logo=android&color=success)](../../releases/latest)
-[![GitHub Downloads](https://img.shields.io/github/downloads/ausypher/Brand-New-Morphe-Builder/total?logo=github&label=Downloads&color=orange)](https://github.com/ausypher/Brand-New-Morphe-Builder/releases)
+Based on [dj-tanjid/Brand-New-Morphe-Builder](https://github.com/dj-tanjid/Brand-New-Morphe-Builder) and [j-hc/revanced-magisk-module](https://github.com/j-hc/revanced-magisk-module).
 
 </div>
 
-> [!CAUTION]
-> **Security Notice:** Avoid downloading modified APKs or Magisk modules from untrusted third-party websites or Telegram channels. Always build your own or download directly from trusted open-source repositories.
-
 ---
 
-## 🌟 Features & Advanced Engineering
+## Overview
 
-* **Native Bundle Processing:** Feeds `.apkm`, `.xapk`, and `.zip` split bundles directly into the modern Morphe CLI, completely eliminating outdated external `APKEditor.jar` dependencies for faster, safer merges.
-* **Pristine Signature Preservation (`include-stock = "split"`):** Guarantees original developer signatures (Google, Meta, Discord) remain 100% untouched inside root modules. This flawlessly prevents Google Play Services `PackageVerificationRslt` crashes and `INSTALL_FAILED_DUPLICATE_PERMISSION` errors.
-* **Smart Post-Patch Architecture Stripping:** Dynamically strips unnecessary ABI folders (`x86`, `armeabi-v7a`) from the final patched output, meticulously preserving strict 4-byte/16KB `zipalign` boundaries while significantly reducing module bloat.
-* **5-Tier Fallback Download Engine:** Automatically resolves APK assets via an intelligent cascading pipeline: $\text{APKMirror} \longrightarrow \text{Uptodown} \longrightarrow \text{GitHub Releases} \longrightarrow \text{Direct DL} \longrightarrow \text{Archive.org}$
-* **Autonomous Python Scraping Backend:** Cloudflare-resilient downloading engine natively powered by `curl_cffi` and local Docker solver integration.
-* **Dual-Host Toolchain Fetching (`github:` & `gitlab:`):** Dynamically pulls patch bundles and CLI binaries across GitHub Releases and GitLab APIs using uniform URI prefixes.
-* **Multi-Bundle Compilation:** Merges multiple independent patch sets (e.g., `crimera/piko` + secondary shims) into a single, cohesive patching run.
-* **Version Code & Suffix Targeting:** Allows specifying an exact `version-code` or target release suffix in `config.toml`, forcefully pinning specific builds and bypassing ambiguous version numbering.
-* **AAPT2 Badging & Auto-Force:** Extracts true `versionName` attributes directly from downloaded binaries and automatically forces compilation through patch version mismatches.
-* **Multi-Architecture Matrix Compilation (`arch = "both"`):** Concurrently packages architecture-tailored APKs and universal root modules (`arm64-v8a`, `armeabi-v7a`, `x86_64`).
+Brand New Morphe Builder is an automated build environment for creating patched Android applications and installable root modules.
 
----
+It brings multiple patch providers and download sources together in one configurable GitHub Actions workflow. Select the apps and variants you need, run a build, and get the resulting packages from your repository's Releases page.
 
-## 📱 Supported Applications
+> **Security note:** Build from source whenever possible. Only install APKs and modules from repositories and release sources you trust.
 
-| Application | Patch Provider | Variants Built |
-| :--- | :--- | :--- |
-| **YouTube** | Morphe / Anddea | Non-Root APK + Root Module |
-| **YouTube Music** | Morphe / Anddea | Non-Root APK + Root Module |
-| **Google Photos** | De-Vanced / Rushi / Akash | Non-Root APK + Root Module |
-| **Reddit** | Morphe | Non-Root APK + Root Module |
-| **Discord** | Venus | Non-Root APK + Root Module |
-| **Twitter / X** | Piko / Piko-NewX | Non-Root APK |
-| **Instagram** | SysAdminDoc / Piko | Non-Root APK + Root Module |
-| **Facebook & Messenger** | SysAdminDoc / De-Vanced / Froggo / Andrew | Non-Root APK + Root Module |
-| **Threads** | SysAdminDoc / Chiggi / De-Vanced | Non-Root APK + Root Module |
-| **Pixel Camera** | Akshayykadam | Non-Root APK |
-| **Gboard** | Jason | Non-Root APK + Root Module |
-| **Claude by Anthropic** | SatanMerde | Non-Root APK |
-| **DeepL** | SatanMerde | Non-Root APK |
-| **Google Maps** | BearInMindCat | Non-Root APK + Root Module |
-| **VPNs (1.1.1.1, Proton, Windscribe)** | Rushi / Rahaatul | Non-Root APK |
-| **Utilities (Speedtest, Send Files To TV, TeraBox)** | SatanMerde / Rushi / HXReborn | Non-Root APK |
-| **PokeRaid** | Dan1elTheMan1el / Nai64 | Non-Root APK |
+## Highlights
 
----
+| Capability | Description |
+|---|---|
+| **Automated builds** | Build through GitHub Actions, manually or using configured workflows. |
+| **Multiple patch sources** | Combine patch bundles from different providers in one build. |
+| **APK and root output** | Generate standalone APKs and Magisk/KernelSU-compatible modules where supported. |
+| **Flexible APK sourcing** | Fallback download pipeline using APKMirror, Uptodown, GitHub Releases, direct downloads and Archive.org. |
+| **Bundle support** | Process APKM, XAPK and ZIP split packages through the Morphe CLI workflow. |
+| **Architecture options** | Build architecture-specific or multi-architecture packages. |
+| **Version targeting** | Pin app versions, version codes and release suffixes through configuration. |
+| **Automated tooling** | Python-based download tooling with `curl_cffi` and Docker solver integration. |
 
-## 🚀 Installation Guide
+## Supported apps
 
-### Non-Root Users
-1. Download and install [ReVanced GmsCore](https://github.com/ReVanced/GmsCore/releases/latest) or [Morphe MicroG-RE](https://github.com/MorpheApp/MicroG-RE/releases/latest).
-2. Download your preferred patched APK from the [Releases Page](../../releases/latest).
-3. *(Optional)* Import custom clean presets via the in-app settings menu.
+| App | Patch sources | Build output |
+|---|---|---|
+| YouTube | Morphe / Anddea | APK · Root module |
+| YouTube Music | Morphe / Anddea | APK · Root module |
+| Google Photos | De-Vanced / Rushi / Akash | APK · Root module |
+| Reddit | Morphe | APK · Root module |
+| Discord | Venus | APK · Root module |
+| Twitter / X | Piko / Piko-NewX | APK |
+| Instagram | SysAdminDoc / Piko | APK · Root module |
+| Facebook / Messenger | SysAdminDoc / De-Vanced / Froggo / Andrew | APK · Root module |
+| Threads | SysAdminDoc / Chiggi / De-Vanced | APK · Root module |
+| Pixel Camera | Akshayykadam | APK |
+| Gboard | Jason | APK · Root module |
+| Claude | SatanMerde | APK |
+| DeepL | SatanMerde | APK |
+| Google Maps | BearInMindCat | APK · Root module |
+| VPN apps | Rushi / Rahaatul | APK |
+| Utilities | SatanMerde / Rushi / HXReborn | APK |
+| PokeRaid | Dan1elTheMan1el / Nai64 | APK |
 
-### Root Users (Magisk / KernelSU / APatch)
-1. Flash the generated `.zip` module from the [Releases Page](../../releases/latest) in your root manager.
-2. The module automatically handles base installation, library extraction, and mounting without requiring a reboot. Native detection is included for `rvmm-zygisk-mount` to prevent mount conflicts.
+*Availability of individual apps and output types depends on the current configuration and patch-provider compatibility.*
 
----
+## Getting started
 
-## 🛠️ Build Your Own
+### 1. Fork the repository
 
-1. Fork this repository.
-2. If accessing private patch repositories, add a Personal Access Token as **`UPDATE_REPO_PAT`** in **Settings** &rarr; **Secrets and variables** &rarr; **Actions**.
-3. Adjust build selections in [`config.toml`](./config.toml). See [`CONFIG.md`](./CONFIG.md) for full syntax details.
-4. Go to **Actions** &rarr; **Build Modules** &rarr; **Run workflow**.
-5. Download your compiled binaries directly from your GitHub Releases page.
+Create your own fork of this repository on GitHub.
 
----
+### 2. Configure access
 
-## 🤝 Credits
+If your build uses private patch repositories, add a Personal Access Token as:
 
-* [Morphe Team](https://github.com/MorpheApp) : Morphe patcher framework, CLI, and base integrations.
-* [ReVanced Team](https://github.com/ReVanced) : Original bytecode manipulation engine and patch foundations.
-* [Matthew Parker](https://github.com/SysAdminDoc) : Hushfacebook, HushMessenger, HushThreads, and HushGram patches.
-* [VenusIsJaded](https://github.com/VenusIsJaded) : Venus patches for Discord.
-* [crimera](https://github.com/crimera) : Piko and Piko-NewX patches for Twitter/X and Instagram.
-* [Sarthak Sinha (RookieEnough)](https://github.com/RookieEnough) : De-Vanced patches.
-* [SatanMerde](https://github.com/SatanMerde) : D-moniakPatches for Claude, DeepL, and Speedtest.
-* [HXReborn](https://github.com/hxreborn) : Morphe patches for & Proton VPN TeraBox.
-* [Rahaatul](https://github.com/rahaaatul) : Morphe patches for Proton VPN.
-* [Rushi Ranpise](https://github.com/rushiranpise) : Morphe patches for utility tools and VPNs.
-* [Aaron Veil (anddea)](https://github.com/anddea) : ReVanced Extended patches.
-* [Akshay Kadam (Akshayykadam)](https://github.com/Akshayykadam) : Pixel Camera optimization patches.
-* [Jason Wu](https://github.com/jasonwu1994) : Gboard optimization patches.
-* [Akash Sriram](https://github.com/Akash-Sriram) : Google Photos spoofing patches.
-* [bearinmindcat](https://github.com/bearinmindcat) : Google Maps & Waze patches.
-* [Sapito Sucio](https://github.com/SapitoSucio) : Froggo patches for Facebook.
-* [Andrew Liang](https://github.com/andrewliang25) : Facebook layout patches.
-* [durgesh0505](https://github.com/durgesh0505) : Chiggi patches for Threads.
-* [Daniel Friedman](https://github.com/Dan1elTheMan1el) & [Nai64](https://github.com/Nai64) : PokeRaid patch bundles.
-* [Peter Noël Muller](https://github.com/peternmuller) & [Nguyễn Văn Bằng](https://github.com/nvbangg) : Foundational module scripting and inspiration.
+`UPDATE_REPO_PAT`
+
+Go to **Settings → Secrets and variables → Actions** to add the secret.
+
+### 3. Select apps and options
+
+Edit [`config.toml`](./config.toml) to choose applications, patch sources, versions and build variants.
+
+For configuration details, see [`CONFIG.md`](./CONFIG.md).
+
+### 4. Start a build
+
+Open **Actions → Build Modules → Run workflow** and start the workflow.
+
+### 5. Get your packages
+
+When the workflow completes, download the generated APKs or root modules from your repository's [Releases](../../releases) page.
+
+## Installation
+
+<details>
+<summary><strong>Non-root devices</strong></summary>
+
+1. Install a compatible MicroG implementation, such as [ReVanced GmsCore](https://github.com/ReVanced/GmsCore/releases) or [Morphe MicroG-RE](https://github.com/MorpheApp/MicroG-RE/releases).
+2. Download the required patched APK from the Releases page.
+3. Install the APK and complete any app-specific setup.
+
+</details>
+
+<details>
+<summary><strong>Rooted devices — Magisk / KernelSU / APatch</strong></summary>
+
+1. Download the required module ZIP from the Releases page.
+2. Install it through your root manager.
+3. Follow any app-specific instructions provided with the build.
+
+</details>
+
+## Credits
+
+This project builds on the work of many open-source developers and patch authors.
+
+- [Morphe Team](https://github.com/MorpheApp) — Morphe patcher, CLI and integrations.
+- [ReVanced Team](https://github.com/ReVanced) — patching framework and foundations.
+- [Matthew Parker](https://github.com/SysAdminDoc) — Hushfacebook, HushMessenger, HushThreads and HushGram.
+- [VenusIsJaded](https://github.com/VenusIsJaded) — Venus patches for Discord.
+- [crimera](https://github.com/crimera) — Piko and Piko-NewX patches.
+- [RookieEnough](https://github.com/RookieEnough) — De-Vanced patches.
+- [SatanMerde](https://github.com/SatanMerde) — patches for Claude, DeepL and Speedtest.
+- [HXReborn](https://github.com/hxreborn) — patches for utility apps and VPNs.
+- [Rahaatul](https://github.com/rahaaatul) — Morphe patches for Proton VPN.
+- [Rushi Ranpise](https://github.com/rushiranpise) — patches for utility apps and VPNs.
+- [anddea](https://github.com/anddea) — ReVanced Extended patches.
+- [Akshay Kadam](https://github.com/Akshayykadam) — Pixel Camera optimization patches.
+- [Jason Wu](https://github.com/jasonwu1994) — Gboard optimization patches.
+- [Akash Sriram](https://github.com/Akash-Sriram) — Google Photos patches.
+- [bearinmindcat](https://github.com/bearinmindcat) — Google Maps and Waze patches.
+- [Sapito Sucio](https://github.com/SapitoSucio) — Froggo patches for Facebook.
+- [Andrew Liang](https://github.com/andrewliang25) — Facebook layout patches.
+- [durgesh0505](https://github.com/durgesh0505) — Chiggi patches for Threads.
+- [Daniel Friedman](https://github.com/Dan1elTheMan1el) and [Nai64](https://github.com/Nai64) — PokeRaid patch bundles.
+- [Peter Noël Muller](https://github.com/peternmuller) and [Nguyễn Văn Bằng](https://github.com/nvbangg) — foundational module scripting and inspiration.
+
+Thanks to the maintainers of the upstream projects and everyone contributing patches, tools and improvements.
+
+## License
+
+Distributed under the **GNU General Public License v3.0 or later**. See the [LICENSE](./LICENSE) file for the full license text.
 
 ---
 
 <div align="center">
 
-⭐ **Star this repository if you find it helpful!**  
-Maintained with ❤️ by [TanJid Creations](https://github.com/dj-tanjid)
+Maintained by **[ausypher](https://github.com/ausypher)**
+
+<sub>Independent fork · Built with open-source tools</sub>
 
 </div>
-
----
-
-## 📄 License
-
-```text
-Copyright (C) 2024-2026 Tanjidul Hossain (TanJid Creations)
-
-This program is free software: you can redistribute it and/or modify
-it under the terms of the GNU General Public License as published by
-the Free Software Foundation, either version 3 of the License, or
-(at your option) any later version.
-
-This program is distributed in the hope that it will be useful,
-but WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
-GNU General Public License for more details.
-
-You should have received a copy of the GNU General Public License
-along with this program. If not, see https://www.gnu.org/licenses/
