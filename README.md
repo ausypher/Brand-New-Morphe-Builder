@@ -3,14 +3,20 @@
 # ⚡ Brand New Morphe Builder
 
 <p align="center">
+  <b>This repository is a fork based on</b><br>
+  <a href="https://github.com/dj-tanjid/Brand-New-Morphe-Builder">dj-tanjid/Brand-New-Morphe-Builder</a> and
+  <a href="https://github.com/j-hc/revanced-magisk-module">j-hc/revanced-magisk-module</a>.
+</p>
+
+<p align="center">
   <b>Automated, high-performance CI/CD pipeline for building root Magisk/KernelSU modules and non-root APKs.</b><br>
   Powered by <a href="https://github.com/MorpheApp">Morphe</a>, <a href="https://github.com/crimera/piko">Piko</a>, <a href="https://github.com/SysAdminDoc">SysAdminDoc</a>, <a href="https://github.com/VenusIsJaded/Venus-Patches">Venus</a>, and many more.
 </p>
 
-[![Build Workflow](https://img.shields.io/github/actions/workflow/status/dj-tanjid/Brand-New-Morphe-Builder/build.yml?label=Build%20Status&logo=githubactions&logoColor=white)](../../actions/workflows/build.yml)
-[![GitHub License](https://img.shields.io/github/license/dj-tanjid/Brand-New-Morphe-Builder?logo=github&label=License&color=blue)](https://github.com/dj-tanjid/Brand-New-Morphe-Builder/blob/main/LICENSE)
-[![Latest Release](https://img.shields.io/github/v/release/dj-tanjid/Brand-New-Morphe-Builder?label=Latest%20Release&logo=android&color=success)](../../releases/latest)
-[![GitHub Downloads](https://img.shields.io/github/downloads/dj-tanjid/Brand-New-Morphe-Builder/total?logo=github&label=Downloads&color=orange)](https://github.com/dj-tanjid/Brand-New-Morphe-Builder/releases)
+[![Build Workflow](https://img.shields.io/github/actions/workflow/status/ausypher/Brand-New-Morphe-Builder/build.yml?label=Build%20Status&logo=githubactions&logoColor=white)](../../actions/workflows/build.yml)
+[![GitHub License](https://img.shields.io/github/license/ausypher/Brand-New-Morphe-Builder?logo=github&label=License&color=blue)](https://github.com/ausypher/Brand-New-Morphe-Builder/blob/main/LICENSE)
+[![Latest Release](https://img.shields.io/github/v/release/ausypher/Brand-New-Morphe-Builder?label=Latest%20Release&logo=android&color=success)](../../releases/latest)
+[![GitHub Downloads](https://img.shields.io/github/downloads/ausypher/Brand-New-Morphe-Builder/total?logo=github&label=Downloads&color=orange)](https://github.com/ausypher/Brand-New-Morphe-Builder/releases)
 
 </div>
 
@@ -68,7 +74,6 @@
 ### Root Users (Magisk / KernelSU / APatch)
 1. Flash the generated `.zip` module from the [Releases Page](../../releases/latest) in your root manager.
 2. The module automatically handles base installation, library extraction, and mounting without requiring a reboot. Native detection is included for `rvmm-zygisk-mount` to prevent mount conflicts.
-3. *(Optional)* Use [zygisk-detach](https://github.com/j-hc/zygisk-detach) to detach YouTube and YT Music from Google Play Store auto-updates.
 
 ---
 
@@ -84,7 +89,6 @@
 
 ## 🤝 Credits
 
-* [j-hc](https://github.com/j-hc) : Original creator of the ReVanced Magisk module builder.
 * [Morphe Team](https://github.com/MorpheApp) : Morphe patcher framework, CLI, and base integrations.
 * [ReVanced Team](https://github.com/ReVanced) : Original bytecode manipulation engine and patch foundations.
 * [Matthew Parker](https://github.com/SysAdminDoc) : Hushfacebook, HushMessenger, HushThreads, and HushGram patches.
