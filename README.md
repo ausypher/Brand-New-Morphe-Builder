@@ -11,6 +11,8 @@
 
 **Automated Android patch builds · Multiple patch sources · APK & root modules**
 
+<sub>Fork based on <a href="https://github.com/dj-tanjid/Brand-New-Morphe-Builder">dj-tanjid/Brand-New-Morphe-Builder</a> and <a href="https://github.com/j-hc/revanced-magisk-module">j-hc/revanced-magisk-module</a>.</sub>
+
 </div>
 
 ---
