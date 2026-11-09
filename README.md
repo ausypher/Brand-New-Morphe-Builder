@@ -1,16 +1,16 @@
 <div align="center">
 
-# ⚡ Brand New Morphe Builder
+# ⚡ Morphe BLDR
 
 ### A unified automation hub for patched Android apps
 
 Build ready-to-install **APK packages** and **root modules** with GitHub Actions.
 
 <p>
-  <a href="https://github.com/ausypher/Brand-New-Morphe-Builder/actions/workflows/build.yml"><img src="https://img.shields.io/github/actions/workflow/status/ausypher/Brand-New-Morphe-Builder/build.yml?style=for-the-badge&logo=githubactions&logoColor=white&label=Build" alt="Build status"></a>
-  <a href="https://github.com/ausypher/Brand-New-Morphe-Builder/releases"><img src="https://img.shields.io/github/v/release/ausypher/Brand-New-Morphe-Builder?style=for-the-badge&logo=android&label=Latest%20release" alt="Latest release"></a>
-  <a href="https://github.com/ausypher/Brand-New-Morphe-Builder/blob/main/LICENSE"><img src="https://img.shields.io/github/license/ausypher/Brand-New-Morphe-Builder?style=for-the-badge&label=License" alt="License"></a>
-  <a href="https://github.com/ausypher/Brand-New-Morphe-Builder/stargazers"><img src="https://img.shields.io/github/stars/ausypher/Brand-New-Morphe-Builder?style=for-the-badge&label=Stars" alt="Stars"></a>
+  <a href="https://github.com/ausypher/morphe-bldr/actions/workflows/build.yml"><img src="https://img.shields.io/github/actions/workflow/status/ausypher/Brand-New-Morphe-Builder/build.yml?style=for-the-badge&logo=githubactions&logoColor=white&label=Build" alt="Build status"></a>
+  <a href="https://github.com/ausypher/morphe-bldr/releases"><img src="https://img.shields.io/github/v/release/ausypher/Brand-New-Morphe-Builder?style=for-the-badge&logo=android&label=Latest%20release" alt="Latest release"></a>
+  <a href="https://github.com/ausypher/morphe-bldr/blob/main/LICENSE"><img src="https://img.shields.io/github/license/ausypher/Brand-New-Morphe-Builder?style=for-the-badge&label=License" alt="License"></a>
+  <a href="https://github.com/ausypher/morphe-bldr/stargazers"><img src="https://img.shields.io/github/stars/ausypher/Brand-New-Morphe-Builder?style=for-the-badge&label=Stars" alt="Stars"></a>
 </p>
 
 **Fork origins**
@@ -23,7 +23,7 @@ Based on [dj-tanjid/Brand-New-Morphe-Builder](https://github.com/dj-tanjid/Brand
 
 ## Overview
 
-Brand New Morphe Builder is an automated build environment for creating patched Android applications and installable root modules.
+Morphe BLDR is an automated build environment for creating patched Android applications and installable root modules.
 
 It brings multiple patch providers and download sources together in one configurable GitHub Actions workflow. Select the apps and variants you need, run a build, and get the resulting packages from your repository's Releases page.
 
