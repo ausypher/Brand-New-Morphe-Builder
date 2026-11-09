@@ -1,21 +1,15 @@
 <div align="center">
 
-# ⚡ Morphe BLDR
-
-### A unified automation hub for patched Android apps
-
-Build ready-to-install **APK packages** and **root modules** with GitHub Actions.
+<img src="https://raw.githubusercontent.com/ausypher/morphe-bldr/main/assets/morphe-bldr-banner.svg" alt="Morphe BLDR — Android Patch Build System" width="100%">
 
 <p>
-  <a href="https://github.com/ausypher/morphe-bldr/actions/workflows/build.yml"><img src="https://img.shields.io/github/actions/workflow/status/ausypher/Brand-New-Morphe-Builder/build.yml?style=for-the-badge&logo=githubactions&logoColor=white&label=Build" alt="Build status"></a>
-  <a href="https://github.com/ausypher/morphe-bldr/releases"><img src="https://img.shields.io/github/v/release/ausypher/Brand-New-Morphe-Builder?style=for-the-badge&logo=android&label=Latest%20release" alt="Latest release"></a>
-  <a href="https://github.com/ausypher/morphe-bldr/blob/main/LICENSE"><img src="https://img.shields.io/github/license/ausypher/Brand-New-Morphe-Builder?style=for-the-badge&label=License" alt="License"></a>
-  <a href="https://github.com/ausypher/morphe-bldr/stargazers"><img src="https://img.shields.io/github/stars/ausypher/Brand-New-Morphe-Builder?style=for-the-badge&label=Stars" alt="Stars"></a>
+  <a href="https://github.com/ausypher/morphe-bldr/actions"><img src="https://img.shields.io/github/actions/workflow/status/ausypher/morphe-bldr/build.yml?style=flat-square&logo=githubactions&logoColor=white&label=Build" alt="Build status"></a>
+  <a href="https://github.com/ausypher/morphe-bldr/releases"><img src="https://img.shields.io/github/v/release/ausypher/morphe-bldr?style=flat-square&logo=android&label=Latest%20release" alt="Latest release"></a>
+  <a href="https://github.com/ausypher/morphe-bldr/blob/main/LICENSE"><img src="https://img.shields.io/github/license/ausypher/morphe-bldr?style=flat-square&label=License" alt="License"></a>
+  <a href="https://github.com/ausypher/morphe-bldr/stargazers"><img src="https://img.shields.io/github/stars/ausypher/morphe-bldr?style=flat-square&label=Stars" alt="Stars"></a>
 </p>
 
-**Fork origins**
-
-Based on [dj-tanjid/Brand-New-Morphe-Builder](https://github.com/dj-tanjid/Brand-New-Morphe-Builder) and [j-hc/revanced-magisk-module](https://github.com/j-hc/revanced-magisk-module).
+**Automated Android patch builds · Multiple patch sources · APK & root modules**
 
 </div>
 
