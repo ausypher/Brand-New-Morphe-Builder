@@ -1,9 +1,5 @@
 name: CI
 on:
-  workflow_dispatch:
-  push:
-    branches:
-      - main
   schedule:
     - cron: "0 0-23/3 * * *"
 
@@ -28,7 +24,7 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          # CI always checks patch-source versions, regardless of how it was started.
+          # Scheduled CI checks patch-source versions and builds only when updates are found.
 
           if ! git checkout origin/update -- build.md; then
             echo "No previous build record; starting the first build."
@@ -59,7 +55,6 @@ jobs:
     uses: ./.github/workflows/build.yml
     if: ${{ needs.check.outputs.SHOULD_BUILD == 1 }}
     with:
-      # Automatic runs build only apps affected by a new patch.
-      # Manual runs bypass the patch filter and rebuild all enabled apps.
+      # Scheduled CI builds only apps affected by a new patch.
       from_ci: true
     secrets: inherit
